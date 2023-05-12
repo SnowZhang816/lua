@@ -47,6 +47,7 @@ func (self *reader) readBytes(n uint) []byte {
 
 func (self *reader) readString() string {
 	size := uint(self.readByte())
+	fmt.Println("readString", size)
 	if size == 0 {		//NULL空字符串
 		return ""
 	}
@@ -131,8 +132,6 @@ func (self *reader) readConstant() interface{} {
 }
 
 func (self *reader) readConstants() []interface{} {
-	fmt.Println("readConstants=======")
-
 	constants := make([]interface{}, self.readUint32())
 
 	fmt.Println("readConstants=======", constants)
@@ -194,6 +193,38 @@ func (self *reader) readProtos(parentSource string) []*Prototype {
 	return protos
 }
 
+func (self *reader) readLineDefined() uint32 {
+	lineDefined := self.readUint32()
+	fmt.Println("readLineDefined=======", lineDefined)
+	return lineDefined
+}
+
+
+func (self *reader) readLastLineDefined() uint32 {
+	lastLineDefined := self.readUint32()
+	fmt.Println("readLastLineDefined=======", lastLineDefined)
+	return lastLineDefined
+}
+
+
+func (self *reader) readNumParams() byte {
+	numParams := self.readByte()
+	fmt.Println("readNumParams=======", numParams)
+	return numParams
+}
+
+func (self *reader) readIsVarArg() byte {
+	isVarArg := self.readByte()
+	fmt.Println("readIsVarArg=======", isVarArg)
+	return isVarArg
+}
+
+func (self *reader) readMaxStackSize() byte {
+	maxStackSize := self.readByte()
+	fmt.Println("readMaxStackSize=======", maxStackSize)
+	return maxStackSize
+}
+
 func (self *reader) readProto(parentSource string) *Prototype {
 	source := self.readString()
 	if source == "" {
@@ -202,11 +233,12 @@ func (self *reader) readProto(parentSource string) *Prototype {
 
 	return &Prototype{
 		Source: 			source,
-		LineDefined: 		self.readUint32(),
-		LastLineDefined: 	self.readUint32(),
-		NumParams: 			self.readByte(),
-		IsVarArg: 			self.readByte(),
-		MaxStackSize: 		self.readByte(),
+		LineDefined: 		self.readLineDefined(),
+		LastLineDefined: 	self.readLastLineDefined(),
+		NumParams: 			self.readNumParams(),
+		IsVarArg: 			self.readIsVarArg(),
+		MaxStackSize: 		self.readMaxStackSize(),
+		Code:				self.readCode(),
 		Constants: 			self.readConstants(),
 		UpValues: 			self.readUpValues(),
 		Protos:				self.readProtos(source),

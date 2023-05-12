@@ -21,9 +21,9 @@ const (
 	TAG_NIL				= 0x00
 	TAG_BOOLEAN			= 0x01
 	TAG_NUMBER			= 0x03
-	TAG_INTEGER			= 0x013
+	TAG_INTEGER			= 0x13
 	TAG_SHORT_STR		= 0x04
-	TAG_LONG_STR		= 0x015
+	TAG_LONG_STR		= 0x14
 )
 
 type header struct {
