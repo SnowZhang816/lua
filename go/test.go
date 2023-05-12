@@ -68,48 +68,47 @@ func list(f *binChunk.Prototype) {
 }
 
 func printHeader(f *binChunk.Prototype) {
-   // funcType := "main"
-   // if f.LineDefined > 0 {
-   //    funcType := "function"
-   // }
+   funcType := "main"
+   if f.LineDefined > 0 {
+      funcType = "function"
+   }
 
-   // varArgFlag := ""
-   // if f.IsVarArg > 0 {
-   //    varArgFlag := "+"
-   // }
-   // fmt.Println(funcType)
-   // fmt.Println(varArgFlag)
+   varArgFlag := ""
+   if f.IsVarArg > 0 {
+      varArgFlag = "+"
+   }
 
-   fmt.Printf("\n%s <%s:%d,%d> (%d instruction)\n", "funcType", f.Source, f.LineDefined, f.LastLineDefined, len(f.Code))
-   fmt.Printf("%d%s params, %d slots, %d upvalues, ", f.NumParams, "varArgFlag", f.MaxStackSize, len(f.UpValues))
+   fmt.Printf("\n%s <%s:%d,%d> (%d instruction)\n", funcType, f.Source, f.LineDefined, f.LastLineDefined, len(f.Code))
+   fmt.Printf("%d%s params, %d slots, %d upvalues, ", f.NumParams, varArgFlag, f.MaxStackSize, len(f.UpValues))
    fmt.Printf("%d locals, %d constants, %d functions\n", len(f.LocVars), len(f.Constants), len(f.Protos))
 }
 
 func printCode(f *binChunk.Prototype) {
+   // fmt.Println("printCode",f.Code,f.LineInfo)
    for pc, c := range f.Code {
       line := "-"
       if len(f.LineInfo) > 0 {
          line = fmt.Sprintf("%d", f.LineInfo[pc])
       }
 
-      fmt.Println("\t%d\t[%s]\t0x%08X\n", pc + 1, line, c)
+      fmt.Printf("\t%d\t[%s]\t0x%08X\n", pc + 1, line, c)
    }
 }
 
 func printDetail(f *binChunk.Prototype) {
-   fmt.Println("constants (%d):\n", len(f.Constants))
+   fmt.Printf("constants (%d):\n", len(f.Constants))
    for i, k := range f.Constants {
-      fmt.Println("\t%d\t%s\n", i+1, constantsToString(k))
+      fmt.Printf("\t%d\t%s\n", i+1, constantsToString(k))
    }
 
-   fmt.Println("locals (%d):\n", len(f.LocVars))
+   fmt.Printf("locals (%d):\n", len(f.LocVars))
    for i, locVar := range f.LocVars {
-      fmt.Println("\t%d\t%s\t%d\t%d\n", i, locVar.VarName, locVar.StartPC, locVar.EndPC)
+      fmt.Printf("\t%d\t%s\t%d\t%d\n", i, locVar.VarName, locVar.StartPC, locVar.EndPC)
    }
 
-   fmt.Println("upValues (%d):\n", len(f.UpValues))
+   fmt.Printf("upValues (%d):\n", len(f.UpValues))
    for i, upValue := range f.UpValues {
-      fmt.Println("\t%d\t%s\t%d\t%d\n", i, upValName(f, i), upValue.InStack, upValue.Idx)
+      fmt.Printf("\t%d\t%s\t%d\t%d\n", i, upValName(f, i), upValue.InStack, upValue.Idx)
    }
 }
 
