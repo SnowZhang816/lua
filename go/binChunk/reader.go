@@ -18,8 +18,8 @@ func (self *reader) readByte() byte {
 }
 
 func (self *reader) readUint32() uint32 {
-	i := binary.BigEndian.Uint32(self.data)
-	// i := binary.LittleEndian.Uint32(self.data)
+	// i := binary.BigEndian.Uint32(self.data)
+	i := binary.LittleEndian.Uint32(self.data)
 	self.data = self.data[4:]
 	return i
 }
@@ -59,14 +59,14 @@ func (self *reader) readString() string {
 
 func (self *reader) checkHeader() {
 	fmt.Println("LUA_SIGNATURE", LUA_SIGNATURE)
-	// b := self.readBytes(4)
-	// fmt.Println("bytes", b)
-	// var x int32
-	// bytesBuffer := bytes.NewBuffer(b)
-    // binary.Read(bytesBuffer, binary.BigEndian, &x)
-	// fmt.Println("x", x)
-	x := self.readUint32()
+	b := self.readBytes(4)
+	fmt.Println("bytes", b)
+	var x int32
+	bytesBuffer := bytes.NewBuffer(b)
+    binary.Read(bytesBuffer, binary.LittleEndian, &x)
 	fmt.Println("x", x)
+	// x := self.readUint32()
+	// fmt.Println("x", x)
 
 	if x != LUA_SIGNATURE {
 		panic("not a precomiled chunk!")
@@ -93,12 +93,12 @@ func (self *reader) checkHeader() {
 
 		b := self.readBytes(8)
 		fmt.Println("b", b)
-		var x int64
+		var x1 int64
 		bytesBuffer := bytes.NewBuffer(b)
-		binary.Read(bytesBuffer, binary.LittleEndian, &x)
-		fmt.Println("x", x)
+		binary.Read(bytesBuffer, binary.LittleEndian, &x1)
+		fmt.Println("x1", x1)
 
-		if x != LUAC_INT {
+		if x1 != LUAC_INT {
 			panic("endianness mismatch")
 		} else if self.readLuaNumber() != LUAC_NUM {
 			panic("float format mismatch")
@@ -115,7 +115,11 @@ func (self *reader) readCode() []uint32 {
 }
 
 func (self *reader) readConstant() interface{} {
-	switch self.readByte() {
+	tag := self.readByte()
+
+	fmt.Println("tag", tag)
+
+	switch tag {
 	case TAG_NIL:			return nil
 	case TAG_BOOLEAN:		return self.readByte() != 0
 	case TAG_INTEGER:		return self.readLuaInteger()
@@ -127,7 +131,12 @@ func (self *reader) readConstant() interface{} {
 }
 
 func (self *reader) readConstants() []interface{} {
+	fmt.Println("readConstants=======")
+
 	constants := make([]interface{}, self.readUint32())
+
+	fmt.Println("readConstants=======", constants)
+
 	for i := range constants {
 		constants[i] = self.readConstant()
 	}

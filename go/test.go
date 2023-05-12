@@ -6,6 +6,8 @@ import (
    "io/ioutil"
    "os"
    "unsafe"
+   "bytes"
+   "encoding/binary"
 )
 
 func main() {

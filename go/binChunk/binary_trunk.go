@@ -4,7 +4,7 @@ import (
 )
 
 const (
-	LUA_SIGNATURE      	= 0x1B4C7561 //"\x1bLua"
+	LUA_SIGNATURE      	= 0x61754C1B//0x1B4C7561 //"\x1bLua"
 	LUAC_VERSION		= 0x53
 	LUAC_FORMAT			= 0
 	LUAC_DATA			= "\x19\x93\r\n\x1a\n"
