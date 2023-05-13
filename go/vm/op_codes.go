@@ -25,7 +25,7 @@ const (
 	OP_SUB
 	OP_MUL
 	OP_MOD
-	OP_pow
+	OP_POW
 	OP_DIV
 	OP_IDIV
 	OP_BAND
@@ -49,6 +49,7 @@ const (
 	OP_RETURN
 	OP_FORLOOP
 	OP_FORPREP
+	OP_TFORCALL
 	OP_TFORLOOP
 	OP_SETLIST
 	OP_CLOSURE
@@ -75,4 +76,50 @@ type opcode struct {
 var opcodes = []opcode{
 	/* 	   T 	A      B        C  	   mode     name        */
 	opcode{0,	1,	OpArgR,  OpArgN,   IABC,    "MOVE"		},
+	opcode{0,	1,	OPArgK,  OpArgN,   IABx,    "LOADK"		},
+	opcode{0,	1,	OpArgN,  OpArgN,   IABx,    "LOADKX"	},
+	opcode{0,	1,	OpArgU,  OpArgU,   IABC,    "LOADBOOL"	},
+	opcode{0,	1,	OpArgU,  OpArgN,   IABC,    "LOADNIL"	},
+	opcode{0,	1,	OpArgU,  OpArgN,   IABC,    "GETUPVAL"	},
+	opcode{0,	1,	OpArgU,  OPArgK,   IABC,    "GETTABUP"	},
+	opcode{0,	1,	OpArgR,  OPArgK,   IABC,    "GETTABLE"	},
+	opcode{0,	0,	OPArgK,  OPArgK,   IABC,    "SETTABUP"	},
+	opcode{0,	0,	OpArgU,  OpArgN,   IABC,    "SETUPVAL"	},
+	opcode{0,	0,	OPArgK,  OPArgK,   IABC,    "SETTABLE"	},
+	opcode{0,	1,	OpArgU,  OpArgU,   IABC,    "NEWTABLE"	},
+	opcode{0,	1,	OpArgR,  OPArgK,   IABC,    "SELF"		},
+	opcode{0,	1,	OPArgK,  OPArgK,   IABC,    "ADD"		},
+	opcode{0,	1,	OPArgK,  OPArgK,   IABC,    "SUB"		},
+	opcode{0,	1,	OPArgK,  OPArgK,   IABC,    "MUL"		},
+	opcode{0,	1,	OPArgK,  OPArgK,   IABC,    "MOD"		},
+	opcode{0,	1,	OPArgK,  OPArgK,   IABC,    "POW"		},
+	opcode{0,	1,	OPArgK,  OPArgK,   IABC,    "DIV"		},
+	opcode{0,	1,	OPArgK,  OPArgK,   IABC,    "IDIV"		},
+	opcode{0,	1,	OPArgK,  OPArgK,   IABC,    "BAND"		},
+	opcode{0,	1,	OPArgK,  OPArgK,   IABC,    "BOR"		},
+	opcode{0,	1,	OPArgK,  OPArgK,   IABC,    "BXOR"		},
+	opcode{0,	1,	OPArgK,  OPArgK,   IABC,    "SHL"	   	},
+	opcode{0,	1,	OPArgK,  OPArgK,   IABC,    "SHR"		},
+	opcode{0,	1,	OpArgR,  OpArgN,   IABC,    "UNM"		},
+	opcode{0,	1,	OpArgR,  OpArgN,   IABC,    "BNOT"		},
+	opcode{0,	1,	OpArgR,  OpArgN,   IABC,    "NOT"		},
+	opcode{0,	1,	OpArgR,  OpArgN,   IABC,    "LEN"		},
+	opcode{0,	1,	OpArgR,  OpArgR,   IABC,    "CONCAT"	},
+	opcode{0,	0,	OpArgR,  OpArgN,   IAsBx,   "JMP"		},
+	opcode{1,	0,	OPArgK,  OPArgK,   IABC,    "EQ"		},
+	opcode{1,	0,	OPArgK,  OPArgK,   IABC,    "LT"		},
+	opcode{1,	0,	OPArgK,  OPArgK,   IABC,    "LE"		},
+	opcode{1,	0,	OpArgN,  OpArgU,   IABC,    "TEST"		},
+	opcode{1,	1,	OpArgR,  OpArgU,   IABC,    "TESTSET"	},
+	opcode{0,	1,	OpArgU,  OpArgU,   IABC,    "CALL"		},
+	opcode{0,	1,	OpArgU,  OpArgU,   IABC,    "TAILCALL"	},
+	opcode{0,	0,	OpArgU,  OpArgN,   IABC,    "RETURN"	},
+	opcode{0,	1,	OpArgR,  OpArgN,   IAsBx,   "FORLOOP"	},
+	opcode{0,	1,	OpArgR,  OpArgN,   IAsBx,   "FORPREP"	},
+	opcode{0,	0,	OpArgN,  OpArgU,   IABC,    "TFORCALL"	},
+	opcode{0,	1,	OpArgR,  OpArgN,   IAsBx,   "TFORLOOP"	},
+	opcode{0,	0,	OpArgU,  OpArgU,   IABC,    "SETLIST"	},
+	opcode{0,	1,	OpArgU,  OpArgN,   IABC,    "CLOSURE"	},
+	opcode{0,	1,	OpArgU,  OpArgN,   IABC,    "VARARG"	},
+	opcode{0,	0,	OpArgU,  OpArgU,   IAx,     "EXTRAARG"	},
 }
