@@ -4,6 +4,8 @@ import (
    "fmt"
    "main/binChunk"
    "main/vm"
+   "main/state"
+   "main/api"
    "io/ioutil"
    "os"
    "unsafe"
@@ -12,8 +14,24 @@ import (
 )
 
 func main() {
-   checkEndian()
    fmt.Println("Hello World!")
+   checkEndian()
+
+   ls := state.New()
+   ls.PushBoolean(true)
+   printStack(ls)
+   ls.PushInteger(10)
+   printStack(ls)
+   ls.PushNumber(10.235)
+   printStack(ls)
+   ls.PushString("0990okkl")
+   printStack(ls)
+   ls.PushValue(2)
+   printStack(ls)
+   ls.Replace(1)
+   printStack(ls)
+
+   fmt.Println("\n\n\n")
    fmt.Println(os.Args)
    if len(os.Args) > 1 {
       data, err := ioutil.ReadFile(os.Args[1])
@@ -102,7 +120,7 @@ func printCode(f *binChunk.Prototype) {
 func printOperands(i vm.Instruction) {
    switch i.OpMode() {
    case vm.IABC:
-      a, b, c := i.ABC()
+      a, c, b := i.ABC()
       fmt.Printf("%d", a)
       if i.BMode() != vm.OpArgN {
          if b > 0xFF {
@@ -170,4 +188,18 @@ func upValName(f *binChunk.Prototype, idx int) string {
       return f.UpValuesNames[idx]
    }
    return "-"
+}
+
+func printStack(ls api.LuaState) {
+   top := ls.GetTop()
+   for i := 1; i <= top; i++ {
+      t := ls.Type(i)
+      switch t {
+      case api.LUA_TBOOLEAN:      fmt.Printf("[%t]", ls.ToBoolean(i))
+      case api.LUA_TNUMBER:       fmt.Printf("[%g]", ls.ToNumber(i))
+      case api.LUA_TSTRING:       fmt.Printf("[%q]", ls.ToString(i))
+      default:                    fmt.Printf("[%s]", ls.TypeName(t))
+      }
+   }
+   fmt.Println("\n")
 }

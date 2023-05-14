@@ -9,10 +9,10 @@ func (self Instruction) Opcode() int {
 	return int(self & 0x3F)
 }
 
-func (self Instruction) ABC() (a, b, c int) {
+func (self Instruction) ABC() (a, c, b int) {
 	a = int(self >> 6 & 0xFF)
-	a = int(self >> 14 & 0x1FF)
-	a = int(self >> 23 & 0x1FF)
+	c = int(self >> 14 & 0x1FF)
+	b = int(self >> 23 & 0x1FF)
 	return
 }
 

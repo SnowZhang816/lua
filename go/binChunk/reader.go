@@ -3,7 +3,7 @@ package binChunk
 import "encoding/binary"
 import "math"
 import (
-	"fmt"
+	// "fmt"
 	"bytes"
 )
 
@@ -47,7 +47,7 @@ func (self *reader) readBytes(n uint) []byte {
 
 func (self *reader) readString() string {
 	size := uint(self.readByte())
-	fmt.Println("readString", size)
+	// fmt.Println("readString", size)
 	if size == 0 {		//NULL空字符串
 		return ""
 	}
@@ -59,13 +59,13 @@ func (self *reader) readString() string {
 }
 
 func (self *reader) checkHeader() {
-	fmt.Println("LUA_SIGNATURE", LUA_SIGNATURE)
+	// fmt.Println("LUA_SIGNATURE", LUA_SIGNATURE)
 	b := self.readBytes(4)
-	fmt.Println("bytes", b)
+	// fmt.Println("bytes", b)
 	var x int32
 	bytesBuffer := bytes.NewBuffer(b)
     binary.Read(bytesBuffer, binary.LittleEndian, &x)
-	fmt.Println("x", x)
+	// fmt.Println("x", x)
 	// x := self.readUint32()
 	// fmt.Println("x", x)
 
@@ -88,16 +88,16 @@ func (self *reader) checkHeader() {
 	} else if self.readByte() != LUA_NUMBER_SIZE {
 		panic("lua_number size mismatch")
 	} else {
-		fmt.Println("LUAC_INT", LUAC_INT)
+		// fmt.Println("LUAC_INT", LUAC_INT)
 		// integer := self.readLuaInteger() 
 		// fmt.Println("integer", integer)
 
 		b := self.readBytes(8)
-		fmt.Println("b", b)
+		// fmt.Println("b", b)
 		var x1 int64
 		bytesBuffer := bytes.NewBuffer(b)
 		binary.Read(bytesBuffer, binary.LittleEndian, &x1)
-		fmt.Println("x1", x1)
+		// fmt.Println("x1", x1)
 
 		if x1 != LUAC_INT {
 			panic("endianness mismatch")
@@ -118,7 +118,7 @@ func (self *reader) readCode() []uint32 {
 func (self *reader) readConstant() interface{} {
 	tag := self.readByte()
 
-	fmt.Println("tag", tag)
+	// fmt.Println("tag", tag)
 
 	switch tag {
 	case TAG_NIL:			return nil
@@ -134,7 +134,7 @@ func (self *reader) readConstant() interface{} {
 func (self *reader) readConstants() []interface{} {
 	constants := make([]interface{}, self.readUint32())
 
-	fmt.Println("readConstants=======", constants)
+	// fmt.Println("readConstants=======", constants)
 
 	for i := range constants {
 		constants[i] = self.readConstant()
@@ -195,33 +195,33 @@ func (self *reader) readProtos(parentSource string) []*Prototype {
 
 func (self *reader) readLineDefined() uint32 {
 	lineDefined := self.readUint32()
-	fmt.Println("readLineDefined=======", lineDefined)
+	// fmt.Println("readLineDefined=======", lineDefined)
 	return lineDefined
 }
 
 
 func (self *reader) readLastLineDefined() uint32 {
 	lastLineDefined := self.readUint32()
-	fmt.Println("readLastLineDefined=======", lastLineDefined)
+	// fmt.Println("readLastLineDefined=======", lastLineDefined)
 	return lastLineDefined
 }
 
 
 func (self *reader) readNumParams() byte {
 	numParams := self.readByte()
-	fmt.Println("readNumParams=======", numParams)
+	// fmt.Println("readNumParams=======", numParams)
 	return numParams
 }
 
 func (self *reader) readIsVarArg() byte {
 	isVarArg := self.readByte()
-	fmt.Println("readIsVarArg=======", isVarArg)
+	// fmt.Println("readIsVarArg=======", isVarArg)
 	return isVarArg
 }
 
 func (self *reader) readMaxStackSize() byte {
 	maxStackSize := self.readByte()
-	fmt.Println("readMaxStackSize=======", maxStackSize)
+	// fmt.Println("readMaxStackSize=======", maxStackSize)
 	return maxStackSize
 }
 
