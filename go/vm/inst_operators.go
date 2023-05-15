@@ -22,20 +22,20 @@ func _unaryArith(i Instruction, vm api.LuaVM, op api.ArithOp) {
 	vm.Replace(a)
 }
 
-func add (i Instruction, vm api.LuaVM) { _binaryArith(i, vm, LUA_OPADD)}
-func sub (i Instruction, vm api.LuaVM) { _binaryArith(i, vm, LUA_OPSUB)}
-func mul (i Instruction, vm api.LuaVM) { _binaryArith(i, vm, LUA_OPMUL)}
-func mod (i Instruction, vm api.LuaVM) { _binaryArith(i, vm, LUA_OPMOD)}
-func pow (i Instruction, vm api.LuaVM) { _binaryArith(i, vm, LUA_OPPOW)}
-func div (i Instruction, vm api.LuaVM) { _binaryArith(i, vm, LUA_OPDIV)}
-func idiv(i Instruction, vm api.LuaVM) { _binaryArith(i, vm, LUA_OPIDIV)}
-func band(i Instruction, vm api.LuaVM) { _binaryArith(i, vm, LUA_OPAND)}
-func bor (i Instruction, vm api.LuaVM) { _binaryArith(i, vm, LUA_OPOR)}
-func bxor(i Instruction, vm api.LuaVM) { _binaryArith(i, vm, LUA_OPBXOR)}
-func shl (i Instruction, vm api.LuaVM) { _binaryArith(i, vm, LUA_OPSHL)}
-func shr (i Instruction, vm api.LuaVM) { _binaryArith(i, vm, LUA_OPSHR)}
-func unm (i Instruction, vm api.LuaVM) { _unaryArith(i, vm, LUA_OPUNM)}
-func bnot(i Instruction, vm api.LuaVM) { _unaryArith(i, vm, LUA_OPBONT)}
+func add (i Instruction, vm api.LuaVM) { _binaryArith(i, vm, api.LUA_OPADD)}
+func sub (i Instruction, vm api.LuaVM) { _binaryArith(i, vm, api.LUA_OPSUB)}
+func mul (i Instruction, vm api.LuaVM) { _binaryArith(i, vm, api.LUA_OPMUL)}
+func mod (i Instruction, vm api.LuaVM) { _binaryArith(i, vm, api.LUA_OPMOD)}
+func pow (i Instruction, vm api.LuaVM) { _binaryArith(i, vm, api.LUA_OPPOW)}
+func div (i Instruction, vm api.LuaVM) { _binaryArith(i, vm, api.LUA_OPDIV)}
+func idiv(i Instruction, vm api.LuaVM) { _binaryArith(i, vm, api.LUA_OPIDIV)}
+func band(i Instruction, vm api.LuaVM) { _binaryArith(i, vm, api.LUA_OPAND)}
+func bor (i Instruction, vm api.LuaVM) { _binaryArith(i, vm, api.LUA_OPOR)}
+func bxor(i Instruction, vm api.LuaVM) { _binaryArith(i, vm, api.LUA_OPBXOR)}
+func shl (i Instruction, vm api.LuaVM) { _binaryArith(i, vm, api.LUA_OPSHL)}
+func shr (i Instruction, vm api.LuaVM) { _binaryArith(i, vm, api.LUA_OPSHR)}
+func unm (i Instruction, vm api.LuaVM) { _unaryArith(i, vm, api.LUA_OPUNM)}
+func bnot(i Instruction, vm api.LuaVM) { _unaryArith(i, vm, api.LUA_OPBONT)}
 
 func len(i Instruction, vm api.LuaVM) {
 	a,b,_ := i.ABC()
@@ -74,9 +74,9 @@ func _compare(i Instruction, vm api.LuaVM, op api.CompareOP) {
 	vm.Pop(2)
 }
 
-func eq(i Instruction, vm api.LuaVM) { _compare(i, vm, LUA_OPEQ)}
-func lt(i Instruction, vm api.LuaVM) { _compare(i, vm, LUA_OPLT)}
-func le(i Instruction, vm api.LuaVM) { _compare(i, vm, LUA_OPLE)}
+func eq(i Instruction, vm api.LuaVM) { _compare(i, vm, api.LUA_OPEQ)}
+func lt(i Instruction, vm api.LuaVM) { _compare(i, vm, api.LUA_OPLT)}
+func le(i Instruction, vm api.LuaVM) { _compare(i, vm, api.LUA_OPLE)}
 
 func not(i Instruction, vm api.LuaVM)  {
 	a,b,_ := i.ABC()
@@ -102,7 +102,6 @@ func testSet(i Instruction, vm api.LuaVM) {
 func test(i Instruction, vm api.LuaVM) {
 	a,_,c := i.ABC()
 	a += 1
-	b += 1
 
 	if vm.ToBoolean(a) != (c != 0) {
 		vm.AddPC(1)

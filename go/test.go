@@ -17,29 +17,7 @@ func main() {
    fmt.Println("Hello World!")
    checkEndian()
 
-   ls := state.New()
-   ls.PushBoolean(true)
-   printStack(ls)
-   ls.PushInteger(10)
-   printStack(ls)
-   ls.PushNumber(10.235)
-   printStack(ls)
-   ls.Arith(api.LUA_OPADD)
-   printStack(ls)
-   ls.PushNumber(50)
-   printStack(ls)
-   ls.Arith(api.LUA_OPMUl)
-   printStack(ls)
-   ls.PushNumber(50)
-   printStack(ls)
-   ls.Arith(api.LUA_OPIDIV)
-   printStack(ls)
-   ls.PushString("50")
-   printStack(ls)
-   ls.Concat(2)
-   printStack(ls)
-   ls.Len(-1)
-   printStack(ls)
+   //testStack()
 
 
    fmt.Println("\n\n\n")
@@ -53,6 +31,8 @@ func main() {
       proto := binChunk.UnDump(data)
 
       list(proto)
+
+      luaMain(proto)
    }
 }
 
@@ -213,4 +193,51 @@ func printStack(ls api.LuaState) {
       }
    }
    fmt.Println("\n")
+}
+
+func testStack() {
+   ls := state.New(20, nil)
+   ls.PushBoolean(true)
+   printStack(ls)
+   ls.PushInteger(10)
+   printStack(ls)
+   ls.PushNumber(10.235)
+   printStack(ls)
+   ls.Arith(api.LUA_OPADD)
+   printStack(ls)
+   ls.PushNumber(50)
+   printStack(ls)
+   ls.Arith(api.LUA_OPMUL)
+   printStack(ls)
+   ls.PushNumber(50)
+   printStack(ls)
+   ls.Arith(api.LUA_OPIDIV)
+   printStack(ls)
+   ls.PushString("50")
+   printStack(ls)
+   ls.Concat(2)
+   printStack(ls)
+   ls.Len(-1)
+   printStack(ls)
+}
+
+func luaMain(proto *binChunk.Prototype)  {
+   nRegs := int(proto.MaxStackSize)
+   fmt.Println("luaMain New")
+   ls := state.New(nRegs + 8, proto)
+   printStack( ls)
+   ls.SetTop(nRegs)
+   printStack(ls)
+   for {
+      pc := ls.PC()
+      inst := vm.Instruction(ls.Fetch())
+
+      if inst.Opcode() != vm.OP_RETURN {
+         inst.Execute(ls)
+         fmt.Printf("[%02d] %s ", pc+1, inst.OpName())
+         printStack(ls)
+      } else {
+         break
+      }
+   }
 }

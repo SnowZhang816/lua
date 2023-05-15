@@ -1,5 +1,7 @@
 package vm
 
+import "main/api"
+
 const (
 	IABC 	= 	iota
 	IABx
@@ -71,6 +73,7 @@ type opcode struct {
 	argCMode		byte	//C arg code
 	opMode			byte	//op mode
 	name 			string	//
+	action			func(i Instruction, vm api.LuaVM)
 }
 
 var opcodes = []opcode{
@@ -122,4 +125,4 @@ var opcodes = []opcode{
 	opcode{0,	1,	OpArgU,  OpArgN,   IABC,    "CLOSURE	",	nil			},
 	opcode{0,	1,	OpArgU,  OpArgN,   IABC,    "VARARG		",	nil			},
 	opcode{0,	0,	OpArgU,  OpArgU,   IAx,     "EXTRAARG	",	nil			},
-},			
+}		

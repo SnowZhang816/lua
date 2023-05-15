@@ -16,7 +16,7 @@ const (
 const (
 	LUA_OPADD = iota	//	+
 	LUA_OPSUB			//	-
-	LUA_OPMUl			//	*
+	LUA_OPMUL			//	*
 	LUA_OPMOD			//	%
 	LUA_OPPOW			//	^
 	LUA_OPDIV			//	/
