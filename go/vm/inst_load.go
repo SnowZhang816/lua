@@ -1,6 +1,7 @@
 package vm
 
 import "main/api"
+import "fmt"
 
 func loadNil(i Instruction, vm api.LuaVM) {
 	a,b,_ := i.ABC()
@@ -24,9 +25,10 @@ func loadBoolean(i Instruction, vm api.LuaVM) {
 }
 
 func loadK(i Instruction, vm api.LuaVM) {
-	a, sbx := i.ABx()
+	a, bx := i.ABx()
+	fmt.Println("loadK", a, bx)
 	a += 1
-	vm.GetConst(sbx)
+	vm.GetConst(bx)
 	vm.Replace(a)
 }
 

@@ -111,7 +111,7 @@ func printCode(f *binChunk.Prototype) {
 func printOperands(i vm.Instruction) {
    switch i.OpMode() {
    case vm.IABC:
-      a, c, b := i.ABC()
+      a, b, c := i.ABC()
       fmt.Printf("%d", a)
       if i.BMode() != vm.OpArgN {
          if b > 0xFF {
@@ -223,9 +223,11 @@ func testStack() {
 
 func luaMain(proto *binChunk.Prototype)  {
    nRegs := int(proto.MaxStackSize)
-   fmt.Println("luaMain New")
+   fmt.Println("luaMain New", nRegs)
    ls := state.New(nRegs + 8, proto)
-   printStack( ls)
+   fmt.Println("New")
+   printStack(ls)
+   fmt.Println("SetTop")
    ls.SetTop(nRegs)
    printStack(ls)
    for {

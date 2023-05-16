@@ -7,9 +7,13 @@ func _binaryArith(i Instruction, vm api.LuaVM, op api.ArithOp) {
 	a += 1
 
 	vm.GetRK(b)
+	// printStack(vm)
 	vm.GetRK(c)
+	// printStack(vm)
 	vm.Arith(op)
+	// printStack(vm)
 	vm.Replace(a)
+	// printStack(vm)
 }
 
 func _unaryArith(i Instruction, vm api.LuaVM, op api.ArithOp) {
@@ -65,9 +69,12 @@ func _compare(i Instruction, vm api.LuaVM, op api.CompareOP) {
 	a,b,c := i.ABC()
 
 	vm.GetRK(b)
+	// printStack(vm)
 	vm.GetRK(c)
+	// printStack(vm)
 
 	if vm.Compare(-2, -1, op) != (a != 0) {
+		// printStack(vm)
 		vm.AddPC(1)
 	}
 
