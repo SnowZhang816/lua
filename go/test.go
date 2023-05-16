@@ -181,44 +181,31 @@ func upValName(f *binChunk.Prototype, idx int) string {
    return "-"
 }
 
-func printStack(ls api.LuaState) {
-   top := ls.GetTop()
-   for i := 1; i <= top; i++ {
-      t := ls.Type(i)
-      switch t {
-      case api.LUA_TBOOLEAN:      fmt.Printf("[%t]", ls.ToBoolean(i))
-      case api.LUA_TNUMBER:       fmt.Printf("[%g]", ls.ToNumber(i))
-      case api.LUA_TSTRING:       fmt.Printf("[%q]", ls.ToString(i))
-      default:                    fmt.Printf("[%s]", ls.TypeName(t))
-      }
-   }
-   fmt.Println("\n")
-}
 
 func testStack() {
    ls := state.New(20, nil)
    ls.PushBoolean(true)
-   printStack(ls)
+   api.PrintStack(ls)
    ls.PushInteger(10)
-   printStack(ls)
+   api.PrintStack(ls)
    ls.PushNumber(10.235)
-   printStack(ls)
+   api.PrintStack(ls)
    ls.Arith(api.LUA_OPADD)
-   printStack(ls)
+   api.PrintStack(ls)
    ls.PushNumber(50)
-   printStack(ls)
+   api.PrintStack(ls)
    ls.Arith(api.LUA_OPMUL)
-   printStack(ls)
+   api.PrintStack(ls)
    ls.PushNumber(50)
-   printStack(ls)
+   api.PrintStack(ls)
    ls.Arith(api.LUA_OPIDIV)
-   printStack(ls)
+   api.PrintStack(ls)
    ls.PushString("50")
-   printStack(ls)
+   api.PrintStack(ls)
    ls.Concat(2)
-   printStack(ls)
+   api.PrintStack(ls)
    ls.Len(-1)
-   printStack(ls)
+   api.PrintStack(ls)
 }
 
 func luaMain(proto *binChunk.Prototype)  {
@@ -226,10 +213,10 @@ func luaMain(proto *binChunk.Prototype)  {
    fmt.Println("luaMain New", nRegs)
    ls := state.New(nRegs + 8, proto)
    fmt.Println("New")
-   printStack(ls)
+   api.PrintStack(ls)
    fmt.Println("SetTop")
    ls.SetTop(nRegs)
-   printStack(ls)
+   api.PrintStack(ls)
    for {
       pc := ls.PC()
       inst := vm.Instruction(ls.Fetch())
@@ -237,7 +224,7 @@ func luaMain(proto *binChunk.Prototype)  {
       if inst.Opcode() != vm.OP_RETURN {
          inst.Execute(ls)
          fmt.Printf("[%02d] %s ", pc+1, inst.OpName())
-         printStack(ls)
+         api.PrintStack(ls)
       } else {
          break
       }

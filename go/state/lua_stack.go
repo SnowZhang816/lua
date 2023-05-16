@@ -3,8 +3,11 @@ package state
 import "fmt"
 
 type luaStack struct {
-	slots []luaValue
-	top int
+	slots 		[]luaValue
+	top 		int
+	prev		*luaStack
+	closure		*luaClosure
+	pc			int
 }
 
 func newLuaStack(size int) *luaStack {
@@ -59,6 +62,7 @@ func (self *luaStack) isValid(idx int) bool {
 
 func (self *luaStack) get(idx int) luaValue {
 	absIdx := self.absIndex(idx)
+	// fmt.Println("stack get absInx", idx, absIdx, self.top)
 	if absIdx > 0 && absIdx <= self.top {
 		return self.slots[absIdx -1]
 	}

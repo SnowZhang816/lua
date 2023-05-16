@@ -1,21 +1,6 @@
 package vm
 
 import "main/api"
-import "fmt"
-
-func printStack(vm api.LuaVM) {
-	top := vm.GetTop()
-	for i := 1; i <= top; i++ {
-	   t := vm.Type(i)
-	   switch t {
-	   case api.LUA_TBOOLEAN:      fmt.Printf("[%t]", vm.ToBoolean(i))
-	   case api.LUA_TNUMBER:       fmt.Printf("[%g]", vm.ToNumber(i))
-	   case api.LUA_TSTRING:       fmt.Printf("[%q]", vm.ToString(i))
-	   default:                    fmt.Printf("[%s]", vm.TypeName(t))
-	   }
-	}
-	fmt.Println("\n")
- }
 
 func forPrep(i Instruction, vm api.LuaVM) {
 	a, sbx := i.AsBx()
@@ -23,13 +8,13 @@ func forPrep(i Instruction, vm api.LuaVM) {
 
 	//R(A) -= R(A + 2)
 	vm.PushValue(a)
-	// printStack(vm)
+	// api.PrintStack(vm)
 	vm.PushValue(a + 2)
-	// printStack(vm)
+	// api.PrintStack(vm)
 	vm.Arith(api.LUA_OPSUB)
-	// printStack(vm)
+	// api.PrintStack(vm)
 	vm.Replace(a)
-	// printStack(vm)
+	// api.PrintStack(vm)
 	vm.AddPC(sbx)
 }
 

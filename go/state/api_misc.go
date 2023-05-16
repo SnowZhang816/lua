@@ -1,9 +1,14 @@
 package state
 
+// import "fmt"
+// import "main/api"
+
 func (self *luaState) Len(idx int) {
 	val := self.stack.get(idx)
 	if s, ok := val.(string); ok {
 		self.stack.push(int64(len(s)))
+	} else if t, ok := val.(*luaTable); ok {
+		self.stack.push(int64(t.len()))
 	} else {
 		panic("length error")
 	}
