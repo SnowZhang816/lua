@@ -4,15 +4,21 @@ import "main/binChunk"
 
 type luaState struct {
 	stack 	*luaStack
-
-	proto 	*binChunk.Prototype
-	pc 		int
 }
 
-func New(stackSize int, proto *binChunk.Prototype) *luaState {
+func New() *luaState {
 	return &luaState{
-		stack: 	newLuaStack(stackSize),
-		proto: 	proto,
-		pc: 	0,
+		stack: 	newLuaStack(20),
 	}
+}
+
+func (self *luaState) pushLuaStack(stack *luaStack) {
+	stack.prev = self.stack
+	self.stack = stack
+}
+
+func (self *luaState) popLuaStack() {
+	stack := self.stack
+	self.stack = stack.prev
+	stack.prev = nil
 }

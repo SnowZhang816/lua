@@ -7,6 +7,7 @@ type luaStack struct {
 	top 		int
 	prev		*luaStack
 	closure		*luaClosure
+	varargs		[]luaValue
 	pc			int
 }
 
@@ -87,4 +88,26 @@ func (self *luaStack) reverse(from, to int) {
 		from++
 		to--
 	}
+}
+
+func (self *luaStack) pushN(vals []luaValue, n int) {
+	nVals := len(vals)
+	if n < 0 {
+		n = nVals
+	}
+	for i := 0; i < n; i++ {
+		if i < nVals {
+			self.push(vals[i])
+		} else {
+			self.push(nil)
+		}
+	}
+}
+
+func (self *luaStack) popN(n int) {
+	vals := make([]luaValue, n)
+	for i := n - 1; i >= 0; i++ {
+		vals[i] = self.pop()
+	}
+	return vals
 }
