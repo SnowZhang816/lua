@@ -3,7 +3,7 @@ package binChunk
 import "encoding/binary"
 import "math"
 import (
-	// "fmt"
+	"fmt"
 	"bytes"
 )
 
@@ -215,7 +215,7 @@ func (self *reader) readNumParams() byte {
 
 func (self *reader) readIsVarArg() byte {
 	isVarArg := self.readByte()
-	// fmt.Println("readIsVarArg=======", isVarArg)
+	fmt.Println("readIsVarArg=======", isVarArg)
 	return isVarArg
 }
 

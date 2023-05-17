@@ -8,13 +8,9 @@ func forPrep(i Instruction, vm api.LuaVM) {
 
 	//R(A) -= R(A + 2)
 	vm.PushValue(a)
-	// api.PrintStack(vm)
 	vm.PushValue(a + 2)
-	// api.PrintStack(vm)
 	vm.Arith(api.LUA_OPSUB)
-	// api.PrintStack(vm)
 	vm.Replace(a)
-	// api.PrintStack(vm)
 	vm.AddPC(sbx)
 }
 

@@ -1,12 +1,13 @@
 package state
 
 import "fmt"
+import "main/api"
 
 type luaStack struct {
 	slots 		[]luaValue
 	top 		int
 	prev		*luaStack
-	closure		*luaClosure
+	closure		*closure
 	varargs		[]luaValue
 	pc			int
 }
@@ -91,6 +92,7 @@ func (self *luaStack) reverse(from, to int) {
 }
 
 func (self *luaStack) pushN(vals []luaValue, n int) {
+	fmt.Println("pushN", vals)
 	nVals := len(vals)
 	if n < 0 {
 		n = nVals
@@ -104,10 +106,58 @@ func (self *luaStack) pushN(vals []luaValue, n int) {
 	}
 }
 
-func (self *luaStack) popN(n int) {
+func (self *luaStack) popN(n int) ([]luaValue) {
 	vals := make([]luaValue, n)
-	for i := n - 1; i >= 0; i++ {
+	for i := n - 1; i >= 0; i-- {
 		vals[i] = self.pop()
 	}
 	return vals
+}
+
+func _toString(val luaValue) string {
+	switch x := val.(type) {
+	case string:				return x
+	case int64, float64:		
+		s := fmt.Sprintf("%v", x)
+		return s
+	default:					return ""
+	}
+}
+
+func _typeName(val api.LuaType) string {
+	switch val {
+	case LUA_TNONE:					return "no value"
+	case LUA_TNIL:					return "nil"
+	case LUA_TBOOLEAN:				return "boolean"
+	case LUA_TLIGHTUSRDATA:			return "light userdata"
+	case LUA_TNUMBER:				return "number"
+	case LUA_TSTRING:				return "string"
+	case LUA_TTABLE:				return "table"
+	case LUA_TFUNCTION:				return "function"
+	case LUA_TUSERDATA:				return "userdata"
+	case LUA_TTHREAD:				return "thread"
+	default:						return ""
+	}
+}
+
+func (self *luaStack)printStack(i int)  {
+	fmt.Printf("[%d] size[%d] top[%d] stack", i, len(self.slots), self.top)
+	for i := 0; i < self.top; i++ {
+		val := self.slots[i]
+	   	t :=  typeOf(val)
+	   	switch t {
+	   	case api.LUA_TBOOLEAN:      	fmt.Printf("[%t]", convertToBoolean(val))
+	   	case api.LUA_TNUMBER:
+			g,_ := convertToFloat(val)    	
+			fmt.Printf("[%g]", g)
+	   	case api.LUA_TSTRING:       	fmt.Printf("[%q]", _toString(val))
+	   	default:                		fmt.Printf("[%s]", _typeName(t))
+	   	}
+	}
+	fmt.Println("\n")
+
+	if self.prev != nil {
+		i += 1
+		self.prev.printStack(i)
+	}
 }

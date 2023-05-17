@@ -10,7 +10,7 @@ func (self *luaState) AddPC(n int) {
 
 func (self *luaState) Fetch() uint32 {
 	i := self.stack.closure.proto.Code[self.stack.pc]
-	self.pc++
+	self.stack.pc++
 	return i
 }
 
@@ -27,7 +27,24 @@ func (self *luaState) GetRK(rk int) {
 	}
 }
 
-func (self *luaState) LoadProto(n int) {
-	proto := self.stack.closure.proto.Protos[n]
-	self.stack.push(proto)
+func (self *luaState) LoadProto(idx int) {
+	proto := self.stack.closure.proto.Protos[idx]
+	closure := newLuaClosure(proto)
+	self.stack.push(closure)
+}
+
+func (self *luaState) RegisterCount() int {
+	return int(self.stack.closure.proto.MaxStackSize)
+}
+
+func (self *luaState) LoadVararg(n int) {
+	if n < 0 {
+		n = len(self.stack.varargs)
+	}
+	self.stack.check(n)
+	self.stack.pushN(self.stack.varargs, n)
+}
+
+func (self *luaState) PrintStack() {
+	self.printStack()
 }

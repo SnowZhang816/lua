@@ -1,6 +1,6 @@
 package state
 
-import "main/binChunk"
+// import "main/binChunk"
 
 type luaState struct {
 	stack 	*luaStack
@@ -21,4 +21,8 @@ func (self *luaState) popLuaStack() {
 	stack := self.stack
 	self.stack = stack.prev
 	stack.prev = nil
+}
+
+func (self *luaState) printStack() {
+	self.stack.printStack(1)
 }

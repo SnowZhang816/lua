@@ -1,20 +1,15 @@
 package vm
 
 import "main/api"
-// import "fmt"
 
 func _binaryArith(i Instruction, vm api.LuaVM, op api.ArithOp) {
 	a,b,c := i.ABC()
 	a += 1
 
 	vm.GetRK(b)
-	// api.PrintStack(vm)
 	vm.GetRK(c)
-	// api.PrintStack(vm)
 	vm.Arith(op)
-	// api.PrintStack(vm)
 	vm.Replace(a)
-	// api.PrintStack(vm)
 }
 
 func _unaryArith(i Instruction, vm api.LuaVM, op api.ArithOp) {
@@ -71,12 +66,9 @@ func _compare(i Instruction, vm api.LuaVM, op api.CompareOP) {
 	a,b,c := i.ABC()
 
 	vm.GetRK(b)
-	// api.PrintStack(vm)
 	vm.GetRK(c)
-	// api.PrintStack(vm)
 
 	if vm.Compare(-2, -1, op) != (a != 0) {
-		// api.PrintStack(vm)
 		vm.AddPC(1)
 	}
 

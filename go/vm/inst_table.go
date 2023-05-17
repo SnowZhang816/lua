@@ -2,13 +2,14 @@ package vm
 
 import "main/api"
 import "fmt"
-// import "main/number"
 
 const LFIELDS_PER_FLUSH = 50
 
 func newTable(i Instruction, vm api.LuaVM) {
 	a, b, c := i.ABC()
 	a += 1
+
+	fmt.Println("vm newTable", a, b, c)
 
 	vm.CreateTable(Fb2int(b), Fb2int(c))
 	vm.Replace(a)
@@ -38,6 +39,12 @@ func setList(i Instruction, vm api.LuaVM) {
 	fmt.Println("setList", a, b, c)
 	a += 1
 
+	bIsZero := b == 0
+	if bIsZero {
+		b = int(vm.ToInteger(-1)) - a - 1
+		vm.Pop(1)
+	}
+
 	if c > 0 {
 		c = c - 1
 	} else {
@@ -48,8 +55,17 @@ func setList(i Instruction, vm api.LuaVM) {
 	for j := 1; j <= b; j++ {
 		idx++
 		vm.PushValue(a + j)
-		api.PrintStack(vm)
+		vm.PrintStack()
 		fmt.Println(a, idx)
 		vm.SetI(a, idx)
+	}
+
+	if bIsZero {
+		for j := vm.RegisterCount() + 1; j <= vm.GetTop(); j++{
+			idx++
+			vm.PushValue(j)
+			vm.SetI(a, idx)
+		}
+		vm.SetTop(vm.RegisterCount())		//clear stack
 	}
 }
