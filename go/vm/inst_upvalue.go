@@ -14,3 +14,23 @@ func getTabUp(i Instruction, vm api.LuaVM) {
 	vm.Replace(a)
 	vm.Pop(1)
 }
+
+func getUpValue(i Instruction, vm api.LuaVM) {
+	a, b, _ := i.ABC()
+	fmt.Println("getUpValue", a, b)
+	a += 1
+	b += 1
+
+	vm.Copy(LuaUpValueIndex(b), a)
+}
+
+func setUpValue(i Instruction, vm api.LuaVM) {
+	a, b, c := i.ABC()
+	fmt.Println("setUpValue", a, b, c)
+	a += 1
+	b += 1
+
+	vm.GetRK(c)
+	vm.GetTable(LuaUpValueIndex(b))
+	vm.Replace(a)
+}

@@ -34,6 +34,23 @@ func (self *luaState) LoadProto(idx int) {
 	fmt.Printf("LoadProto[%d] %s<%d-%d>\n", idx, proto.Source, proto.LineDefined, proto.LastLineDefined)
 	closure := newLuaClosure(proto)
 	self.stack.push(closure)
+
+	for i, uvInfo := range proto.UpValues {
+		uvIdx := int(uvInfo).Idx
+		if uvInfo.InStack == 1 {
+			if stack.openuvs == nil {
+				stack.openuvs = map[int]*upValue{}
+			}
+			if openuv,found := stack.openuvs[uvIdx]; found {
+				closure.upValues[i] = openuv
+			} else {
+				closure.upValues[i] = &upValue{&self.stack.slots[uvIdx]}
+				stack.openuvs[uvIdx] = closure.upValues[i]
+			}
+		} else {
+			closure.upValues[i] = self.stack.closure.upValues[uvIdx]
+		}
+	}
 }
 
 func (self *luaState) RegisterCount() int {

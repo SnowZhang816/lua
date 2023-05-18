@@ -24,8 +24,12 @@ func (self *luaState) PushString(s string) {
 	self.stack.push(s)
 }
 
-func (self *luaState) PushGoFunction(f api.GoFunction) {
-	gClosure := newGoClosure(f)
+func (self *luaState) PushGoFunction(f api.GoFunction, n int) {
+	gClosure := newGoClosure(f, n)
+	for i := n; i > 0; i-- {
+		val := self.stack.pop()
+		gClosure.upValues[n - 1] = &upValue{&val}
+	}
 	self.stack.push(gClosure)
 }
 

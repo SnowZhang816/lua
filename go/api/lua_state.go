@@ -59,7 +59,7 @@ type LuaState interface {
 	Load(chunk []byte, chunkName, mode string) int
 	Call(nArgs, nResults int)
 	/*Go Function*/
-	PushGoFunction(f GoFunction)
+	PushGoFunction(f GoFunction, n int)
 	IsGoFunction(idx int) bool
 	ToGoFunction(idx int) GoFunction
 	/*Global table operator*/
@@ -72,3 +72,7 @@ type LuaState interface {
 }
 
 type GoFunction func(LuaState) int
+
+func LuaUpValueIndex(i int) int {
+	return LUA_REGISTRY_INDEX - i
+}
