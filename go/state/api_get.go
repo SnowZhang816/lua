@@ -45,6 +45,11 @@ func (self *luaState) GetI(idx int, i int64) api.LuaType {
 	return self.getTable(t, i)
 }
 
+func (self *luaState) GetGlobal(name string) api.LuaType {
+	self.PushGlobalTable()
+	return self.GetField(-1, name)
+}
+
 func (self *luaState) PrintTable(idx int) {
 	t := self.stack.get(idx)
 	if tbl,ok := t.(*luaTable); ok {

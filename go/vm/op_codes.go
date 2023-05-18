@@ -84,7 +84,7 @@ var opcodes = []opcode{
 	opcode{0,	1,	OpArgU,  OpArgU,   IABC,    "LOADBOOL   ",	loadBoolean	},
 	opcode{0,	1,	OpArgU,  OpArgN,   IABC,    "LOADNIL    ",	loadNil		},
 	opcode{0,	1,	OpArgU,  OpArgN,   IABC,    "GETUPVAL   ",	nil			},
-	opcode{0,	1,	OpArgU,  OPArgK,   IABC,    "GETTABUP   ",	nil			},
+	opcode{0,	1,	OpArgU,  OPArgK,   IABC,    "GETTABUP   ",	getTabUp	},
 	opcode{0,	1,	OpArgR,  OPArgK,   IABC,    "GETTABLE   ",	getTable	},
 	opcode{0,	0,	OPArgK,  OPArgK,   IABC,    "SETTABUP   ",	nil			},
 	opcode{0,	0,	OpArgU,  OpArgN,   IABC,    "SETUPVAL   ",	nil			},

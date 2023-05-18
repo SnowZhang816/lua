@@ -55,10 +55,20 @@ type LuaState interface {
 	SetTable(idx int)
 	SetField(idx int, k string)
 	SetI(idx int, n int64)
-	/* */
+	/*function load an call*/
 	Load(chunk []byte, chunkName, mode string) int
 	Call(nArgs, nResults int)
-
+	/*Go Function*/
+	PushGoFunction(f GoFunction)
+	IsGoFunction(idx int) bool
+	ToGoFunction(idx int) GoFunction
+	/*Global table operator*/
+	PushGlobalTable()
+	SetGlobal(name string)
+	GetGlobal(name string) LuaType
+	Register(name string, f GoFunction)
 	/**/
 	PrintTable(idx int)
 }
+
+type GoFunction func(LuaState) int

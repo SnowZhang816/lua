@@ -4,6 +4,7 @@ import "fmt"
 import "main/binChunk"
 import "main/aUtil"
 import "main/vm"
+import "main/api"
 
 func (self *luaState) Load(chunk []byte, chunkName, mode string) int {
 	proto := binChunk.UnDump(chunk)
@@ -45,7 +46,7 @@ func (self *luaState) callLuaClosure(nArgs, nResults int, c *closure) {
 
 	fmt.Println("callLuaClosure", nRegs, nParams, isVarArg)
 
-	newStack := newLuaStack(nRegs + 20)
+	newStack := newLuaStack(nRegs + api.LUA_MINSTACK, self)
 	newStack.closure = c
 
 	funcAndArgs := self.stack.popN(nArgs + 1)
@@ -75,11 +76,35 @@ func (self *luaState) callLuaClosure(nArgs, nResults int, c *closure) {
 	}
 }
 
+func (self *luaState) callGoClosure(nArgs, nResults int, c *closure) {
+	newStack := newLuaStack(nArgs + api.LUA_MINSTACK, self)
+	newStack.closure = c
+
+	args := self.stack.popN(nArgs)
+	newStack.pushN(args, nArgs)
+
+	self.pushLuaStack(newStack)
+	r := c.goFunc(self)
+	self.popLuaStack()
+
+	if nResults != 0 {
+		fmt.Println("callGoClosure nResults", r)
+		results := newStack.popN(r)
+		self.stack.check(len(results))
+		self.stack.pushN(results, nResults)
+		self.printStack()
+	}
+}
+
 func (self *luaState) Call(nArgs, nResults int) {
 	val := self.stack.get(-(nArgs + 1))
 	if c,ok := val.(*closure); ok {
 		fmt.Printf("Call %s<%d,%d>\n", c.proto.Source, c.proto.LineDefined, c.proto.LastLineDefined)
-		self.callLuaClosure(nArgs, nResults, c)
+		if c.proto != nil {
+			self.callLuaClosure(nArgs, nResults, c)
+		} else {
+			self.callGoClosure(nArgs, nResults, c)
+		}
 	} else {
 		panic("not function!")
 	}

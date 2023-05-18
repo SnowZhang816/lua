@@ -1,7 +1,7 @@
 package state
 
 import (
-	// "fmt"
+	"main/api"
 )
 
 func (self *luaState) PushNil() {
@@ -22,4 +22,14 @@ func (self *luaState) PushNumber(n float64) {
 
 func (self *luaState) PushString(s string) {
 	self.stack.push(s)
+}
+
+func (self *luaState) PushGoFunction(f api.GoFunction) {
+	gClosure := newGoClosure(f)
+	self.stack.push(gClosure)
+}
+
+func (self *luaState) PushGlobalTable() {
+	global := self.registry.get(api.LUA_RIDX_GLOBALS)
+	self.stack.push(global)
 }

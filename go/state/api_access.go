@@ -72,6 +72,14 @@ func (self *luaState) IsInteger(idx int) bool {
 	return ok
 }
 
+func (self *luaState) IsGoFunction(idx int) bool {
+	val := self.stack.get(idx)
+	if c, ok := val.(*closure); ok {
+		return c.goFunc != nil 
+	}
+	return false
+}
+
 func (self *luaState) ToBoolean(idx int) bool {
 	val := self.stack.get(idx)
 	return convertToBoolean(val)
@@ -112,4 +120,12 @@ func (self *luaState) ToStringX(idx int) (string, bool) {
 		return s, true
 	default:					return "", false
 	}
+}
+
+func (self *luaState) ToGoFunction(idx int) api.GoFunction {
+	val := self.stack.get(idx)
+	if c, ok := val.(*closure); ok {
+		return c.goFunc 
+	}
+	return nil
 }

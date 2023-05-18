@@ -1,15 +1,21 @@
 package state
 
 import "fmt"
+import "main/api"
 
 type luaState struct {
-	stack 	*luaStack
+	registry 		*luaTable
+	stack 			*luaStack
 }
 
 func New() *luaState {
-	return &luaState{
-		stack: 	newLuaStack(20),
-	}
+	registry := newLuaTable(0,0)
+	registry.put(api.LUA_RIDX_GLOBALS, newLuaTable(0,0))		//全局环境
+
+	ls :=  &luaState{registry : registry,}
+	ls.pushLuaStack(newLuaStack(api.LUA_MINSTACK, ls))
+
+	return ls
 }
 
 func (self *luaState) pushLuaStack(stack *luaStack) {
