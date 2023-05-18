@@ -10,13 +10,14 @@ func (self *luaState) Load(chunk []byte, chunkName, mode string) int {
 	proto := binChunk.UnDump(chunk)
 	aUtil.PrintProto(proto)
 
-	fmt.Println("\n\n\nstart new closure!")
+	fmt.Println("\n\n\n luaState Load")
 	c := newLuaClosure(proto)
 
 	self.stack.push(c)
 	if len(proto.UpValues) > 0{
-		env := self.registry.get(LUA_RIDX_GLOBALS)
-		c.upValues[0] = &upValue(&env)
+		env := self.registry.get(api.LUA_RIDX_GLOBALS)
+		c.upValues[0] = &upValue{&env}
+		fmt.Println("Load upValues", c.upValues)
 	}
 
 	self.printStack()

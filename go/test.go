@@ -62,14 +62,15 @@ func checkEndian() {
 
 func print(ls api.LuaState) int {
    nArgs := ls.GetTop()
+   fmt.Printf("LUAPrint:%d\n", nArgs)
    fmt.Printf("LUAPrint:")
    for i := 1; i <= nArgs; i++ {
       if ls.IsBoolean(i) {
-         fmt.Printf("%t", ls.ToBoolean(i))
+         fmt.Printf("1%t", ls.ToBoolean(i))
       } else if ls.IsString(i) {
-         fmt.Printf("%s", ls.ToString(i))
+         fmt.Printf("2%s", ls.ToString(i))
       } else {
-         fmt.Printf("%s",ls.TypeName(ls.Type(i)))
+         fmt.Printf("3%s",ls.TypeName(ls.Type(i)))
       }
       if i < nArgs {
          fmt.Print(" ")

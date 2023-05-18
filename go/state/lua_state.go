@@ -9,6 +9,7 @@ type luaState struct {
 }
 
 func New() *luaState {
+	fmt.Println("New luaState")
 	registry := newLuaTable(0,0)
 	registry.put(api.LUA_RIDX_GLOBALS, newLuaTable(0,0))		//全局环境
 

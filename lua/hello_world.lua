@@ -30,8 +30,27 @@
 -- assert(t[1] == 128 and t[2] == 4)
 
 --go函数调用测试
-local function max()
+-- local function max()
 
+-- end
+
+-- print("dasdasda", {}, max)
+
+--闭包测试
+
+local function newCounter()
+    local count = 0
+    return function ()
+        count = count + 1
+        return count
+    end
 end
 
-print("dasdasda", {}, max)
+local c1 = newCounter()
+print(c1())
+print(c1())
+
+local c2 = newCounter()
+print(c2())
+print(c2())
+print(c2())

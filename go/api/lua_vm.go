@@ -10,7 +10,7 @@ type LuaVM interface {
 	LoadProto(idx int)
 	RegisterCount() int			//寄存器数量
 	LoadVararg(n int)			//加载vararg参数
-
+	CloseUpValues(a int)
 
 
 

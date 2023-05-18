@@ -2,6 +2,7 @@ package state
 
 import "main/binChunk"
 import "main/api"
+import "fmt"
 
 type upValue struct {
 	val *luaValue
@@ -14,6 +15,7 @@ type closure struct {
 }
 
 func newLuaClosure(proto *binChunk.Prototype) *closure {
+	fmt.Println("newLuaClosure")
 	c := &closure{proto: proto}
 	if nUpValue := len(proto.UpValues); nUpValue > 0 {
 		c.upValues = make([]*upValue, nUpValue)
