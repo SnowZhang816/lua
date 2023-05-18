@@ -5,6 +5,7 @@ import "fmt"
 
 func loadNil(i Instruction, vm api.LuaVM) {
 	a,b,_ := i.ABC()
+	fmt.Println("loadNil", a,b)
 	a += 1
 
 	vm.PushNil()

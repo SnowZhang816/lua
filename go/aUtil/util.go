@@ -83,7 +83,6 @@ func printOperands(i vm.Instruction) {
 	case vm.IABx:
 	   a, bx := i.ABx()
 	   fmt.Printf("%d", a)
- 
 	   if i.BMode() == vm.OPArgK {
 		  fmt.Printf(" %d", -1-bx)
 	   } else if i.BMode() == vm.OpArgU {
@@ -106,7 +105,7 @@ func printDetail(f *binChunk.Prototype) {
  
 	fmt.Printf("locals (%d):\n", len(f.LocVars))
 	for i, locVar := range f.LocVars {
-	   fmt.Printf("\t%d\t%s\t%d\t%d\n", i, locVar.VarName, locVar.StartPC, locVar.EndPC)
+	   fmt.Printf("\t%d\t%s\t\t%d\t%d\n", i, locVar.VarName, locVar.StartPC, locVar.EndPC)
 	}
  
 	fmt.Printf("upValues (%d):\n", len(f.UpValues))

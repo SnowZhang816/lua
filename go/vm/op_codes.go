@@ -122,7 +122,7 @@ var opcodes = []opcode{
 	opcode{0,	0,	OpArgN,  OpArgU,   IABC,    "TFORCALL   ",	nil			},
 	opcode{0,	1,	OpArgR,  OpArgN,   IAsBx,   "TFORLOOP   ",	nil			},
 	opcode{0,	0,	OpArgU,  OpArgU,   IABC,    "SETLIST    ",	setList		},
-	opcode{0,	1,	OpArgU,  OpArgN,   IABC,    "CLOSURE    ",	closure	  	},
+	opcode{0,	1,	OpArgU,  OpArgN,   IABx,    "CLOSURE    ",	closure	  	},
 	opcode{0,	1,	OpArgU,  OpArgN,   IABC,    "VARARG     ",	vararg		},
 	opcode{0,	0,	OpArgU,  OpArgU,   IAx,     "EXTRAARG   ",	nil			},
 }		

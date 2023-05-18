@@ -1,5 +1,7 @@
 package state
 
+// import "fmt"
+
 func (self *luaState) setTable(t,k,v luaValue) {
 	if tbl,ok := t.(*luaTable); ok {
 		tbl.put(k,v)

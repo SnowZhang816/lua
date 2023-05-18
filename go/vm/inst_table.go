@@ -17,11 +17,14 @@ func newTable(i Instruction, vm api.LuaVM) {
 
 func getTable(i Instruction, vm api.LuaVM) {
 	a, b, c := i.ABC()
+	fmt.Println("getTable", a, b, c)
 	a += 1
 	b += 1
 
 	vm.GetRK(c)
+	vm.PrintStack()
 	vm.GetTable(b)
+	vm.PrintStack()
 	vm.Replace(a)
 }
 
@@ -68,4 +71,6 @@ func setList(i Instruction, vm api.LuaVM) {
 		}
 		vm.SetTop(vm.RegisterCount())		//clear stack
 	}
+
+	vm.PrintTable(a)
 }

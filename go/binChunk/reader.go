@@ -227,6 +227,7 @@ func (self *reader) readMaxStackSize() byte {
 
 func (self *reader) readProto(parentSource string) *Prototype {
 	source := self.readString()
+	fmt.Println("readProto", source)
 	if source == "" {
 		source = parentSource
 	}

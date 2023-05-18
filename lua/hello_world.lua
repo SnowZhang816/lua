@@ -3,14 +3,16 @@ local function max(...)
     local val, idx
     for i = 1, #args do
         if val == nil or args[i] > val then
-            val,idx = args[0], i
+            val,idx = args[i], i
         end
     end
     return val,idx
 end
 
 local function assert(v)
-    if not v then fail() end
+    if not v then 
+        fail() 
+    end
 end
 
 local v1 = max(3,9,7,128,5)

@@ -24,9 +24,10 @@ func (self *luaState) runLuaClosure() {
 		pc := self.PC()
 
 		inst := vm.Instruction(self.Fetch())
-		inst.Execute(self)
 
-		fmt.Printf("[%02d] %s \n", pc+1, inst.OpName())
+		// fmt.Printf("[%02d] %s start \n", pc+1, inst.OpName())
+		inst.Execute(self)
+		fmt.Printf("[%02d] %s end\n", pc+1, inst.OpName())
 		self.printStack()
 
 		if inst.Opcode() == vm.OP_RETURN {
@@ -50,10 +51,11 @@ func (self *luaState) callLuaClosure(nArgs, nResults int, c *closure) {
 	funcAndArgs := self.stack.popN(nArgs + 1)
 
 	newStack.pushN(funcAndArgs[1:], nParams)
-
+	newStack.printStack(1)
 	newStack.top = nRegs
 	if nArgs > nParams && isVarArg {
 		newStack.varargs = funcAndArgs[nParams + 1:]
+		fmt.Println("callLuaClosure set varargs\n", newStack.varargs)
 	}
 
 	self.pushLuaStack(newStack)
@@ -65,9 +67,11 @@ func (self *luaState) callLuaClosure(nArgs, nResults int, c *closure) {
 	self.printStack()
 
 	if nResults != 0 {
+		fmt.Println("callLuaClosure nResults", nResults, newStack.top, nRegs, c.proto.Source, c.proto.LineDefined, c.proto.LastLineDefined)
 		results := newStack.popN(newStack.top - nRegs)
 		self.stack.check(len(results))
 		self.stack.pushN(results, nResults)
+		self.printStack()
 	}
 }
 

@@ -92,7 +92,7 @@ func (self *luaStack) reverse(from, to int) {
 }
 
 func (self *luaStack) pushN(vals []luaValue, n int) {
-	fmt.Println("pushN", vals)
+	fmt.Println("pushN", vals, n)
 	nVals := len(vals)
 	if n < 0 {
 		n = nVals
@@ -151,6 +151,7 @@ func (self *luaStack)printStack(i int)  {
 			g,_ := convertToFloat(val)    	
 			fmt.Printf("[%g]", g)
 	   	case api.LUA_TSTRING:       	fmt.Printf("[%q]", _toString(val))
+		case LUA_TFUNCTION:				fmt.Printf("[%d]", val)
 	   	default:                		fmt.Printf("[%s]", _typeName(t))
 	   	}
 	}
