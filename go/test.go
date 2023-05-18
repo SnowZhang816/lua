@@ -10,6 +10,8 @@ import (
    "encoding/binary"
 )
 
+import "main/api"
+
 func main() {
    fmt.Println("Hello World!")
    checkEndian()
@@ -21,6 +23,7 @@ func main() {
       }
 
       ls := state.New()
+      ls.Register("print", print)
       ls.Load(data, os.Args[1], "b")
       ls.Call(0, 0)
    }
@@ -55,4 +58,23 @@ func checkEndian() {
      fmt.Println("大端模式")
    }
    fmt.Println("小端模式")
+}
+
+func print(ls api.LuaState) int {
+   nArgs := ls.GetTop()
+   fmt.Printf("LUAPrint:")
+   for i := 1; i <= nArgs; i++ {
+      if ls.IsBoolean(i) {
+         fmt.Printf("%t", ls.ToBoolean(i))
+      } else if ls.IsString(i) {
+         fmt.Printf("%s", ls.ToString(i))
+      } else {
+         fmt.Printf("%s",ls.TypeName(ls.Type(i)))
+      }
+      if i < nArgs {
+         fmt.Print(" ")
+      }
+   }
+   fmt.Println()
+   return 0
 }

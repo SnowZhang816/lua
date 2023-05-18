@@ -99,10 +99,11 @@ func (self *luaState) callGoClosure(nArgs, nResults int, c *closure) {
 func (self *luaState) Call(nArgs, nResults int) {
 	val := self.stack.get(-(nArgs + 1))
 	if c,ok := val.(*closure); ok {
-		fmt.Printf("Call %s<%d,%d>\n", c.proto.Source, c.proto.LineDefined, c.proto.LastLineDefined)
 		if c.proto != nil {
+			fmt.Printf("Call %s<%d,%d>\n", c.proto.Source, c.proto.LineDefined, c.proto.LastLineDefined)
 			self.callLuaClosure(nArgs, nResults, c)
 		} else {
+			fmt.Printf("GoFunc\n")
 			self.callGoClosure(nArgs, nResults, c)
 		}
 	} else {
