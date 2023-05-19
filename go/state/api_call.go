@@ -107,6 +107,7 @@ func (self *luaState) callGoClosure(nArgs, nResults int, c *closure) {
 func (self *luaState) Call(nArgs, nResults int) {
 	val := self.stack.get(-(nArgs + 1))
 	c,ok := val.(*closure)
+	fmt.Println("Call", c, ok)
 	if !ok {
 		if mf := getMetaField(val, "__call", self); mf != nil {
 			if c,ok = mf.(*closure); ok {

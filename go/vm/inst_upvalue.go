@@ -16,7 +16,7 @@ func getTabUp(i Instruction, vm api.LuaVM) {
 
 func setTabUp(i Instruction, vm api.LuaVM) {
 	a, b, c := i.ABC()
-	fmt.Println("getTabUp", a, b, c)
+	fmt.Println("setTabUp", a, b, c)
 	a += 1
 
 	vm.GetRK(b)

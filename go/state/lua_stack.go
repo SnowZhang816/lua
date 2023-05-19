@@ -77,12 +77,14 @@ func (self *luaStack) isValid(idx int) bool {
 }
 
 func (self *luaStack) get(idx int) luaValue {
+	fmt.Println("luaStack get", idx)
 	if idx < api.LUA_REGISTRY_INDEX {
 		uvIdx := api.LUA_REGISTRY_INDEX - idx - 1
 		c := self.closure
 		if c == nil || uvIdx >= len(c.upValues) {
 			return nil
 		}
+		fmt.Println("luaStack get uvIdx", uvIdx)
 		return *(c.upValues[uvIdx].val)
 	}
 	if idx == api.LUA_REGISTRY_INDEX {

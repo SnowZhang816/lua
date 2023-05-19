@@ -24,6 +24,8 @@ func main() {
 
       ls := state.New()
       ls.Register("print", print)
+      ls.Register("getMateTable", getMateTable)
+      ls.Register("setMateTable", setMateTable)
       ls.Load(data, os.Args[1], "b")
       ls.Call(0, 0)
    }
@@ -77,4 +79,16 @@ func print(ls api.LuaState) int {
    }
    fmt.Println()
    return 0
+}
+
+func getMateTable(ls api.LuaState) int {
+   if ls.GetMetaTable(1) {
+      ls.PushNil()
+   }
+   return 1
+}
+
+func setMateTable(ls api.LuaState) int {
+   ls.SetMetaTable(1)
+   return 1
 }

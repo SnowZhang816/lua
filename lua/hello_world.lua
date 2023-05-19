@@ -37,20 +37,69 @@
 -- print("dasdasda", {}, max)
 
 --闭包测试
+-- local function newCounter()
+--     local count = 0
+--     return function ()
+--         count = count + 1
+--         return count
+--     end
+-- end
 
-local function newCounter()
-    local count = 0
-    return function ()
-        count = count + 1
-        return count
+-- local c1 = newCounter()
+-- print(c1())
+-- print(c1())
+
+-- local c2 = newCounter()
+-- print(c2())
+-- print(c2())
+-- print(c2())
+
+--元表测试
+local mt = {}
+
+function vector(x, y)
+    local v = {x = x, y = y}
+    setmetatable(v, mt)
+    return v
+end
+
+-- mt.__add = function (v1, v2)
+--     return vector(v1.x + v2.x, v1.y + v2.y)
+-- end
+
+-- mt.__sub = function (v1, v2)
+--     return vector(v1.x - v2.x, v1.y - v2.y)
+-- end
+
+-- mt.__mul = function (v1, n)
+--     return vector(v1.x * n, v1.y * n)
+-- end
+
+-- mt.__eq = function (v1, v2)
+--     return v1.x == v2.x and v1.y == v2.y
+-- end
+
+mt.__index = function (v,k)
+    if k == "print" then
+        return function ()
+            print("["..v.x..","..v.y.."]")
+        end
     end
 end
 
-local c1 = newCounter()
-print(c1())
-print(c1())
+-- mt.__call = function (v)
+--     print("["..v.x..","..v.y.."]")
+-- end
 
-local c2 = newCounter()
-print(c2())
-print(c2())
-print(c2())
+local v1 = vector(1,2)
+v1:print()
+-- v1.print(v1)
+-- local v2 = vector(3,4)
+-- v2:print()
+-- local v3 = v1 * 2
+-- v3:print()
+-- local v4 = v1 + v2
+-- v4:print()
+-- print(v1 == v2)
+-- print(v2 == vector(3,4))
+-- v4()
