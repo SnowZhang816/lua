@@ -7,10 +7,23 @@ func (self *luaState) Len(idx int) {
 	val := self.stack.get(idx)
 	if s, ok := val.(string); ok {
 		self.stack.push(int64(len(s)))
+	} else if result, ok := callMetaMethod(val, val, "__len", self); ok { 
+		self.stack.push(result)
 	} else if t, ok := val.(*luaTable); ok {
 		self.stack.push(int64(t.len()))
 	} else {
-		panic("length error")
+		panic("length error!")
+	}
+}
+
+func (self *luaState) RawLen(idx int) {
+	val := self.stack.get(idx)
+	if s, ok := val.(string); ok {
+		self.stack.push(int64(len(s)))
+	} else if t, ok := val.(*luaTable); ok {
+		self.stack.push(int64(t.len()))
+	} else {
+		panic("length error!")
 	}
 }
 
@@ -25,6 +38,13 @@ func (self *luaState) Concat(n int) {
 				self.stack.pop()
 				self.stack.pop()
 				self.stack.push(s1 + s2)
+				continue
+			}
+
+			b := self.stack.pop()
+			a := self.stack.pop()
+			if result,ok := callMetaMethod(a, b, "__concat", self); ok {
+				self.stack.push(result)
 				continue
 			}
 

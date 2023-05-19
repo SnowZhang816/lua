@@ -106,7 +106,18 @@ func (self *luaState) callGoClosure(nArgs, nResults int, c *closure) {
 
 func (self *luaState) Call(nArgs, nResults int) {
 	val := self.stack.get(-(nArgs + 1))
-	if c,ok := val.(*closure); ok {
+	c,ok := val.(*closure)
+	if !ok {
+		if mf := getMetaField(val, "__call", self); mf != nil {
+			if c,ok = mf.(*closure); ok {
+				self.stack.push(val)
+				self.Insert(-(nArgs + 2))
+				nArgs += 1
+			}
+		}
+	}
+
+	if ok {
 		if c.proto != nil {
 			fmt.Printf("Call %s<%d,%d>\n", c.proto.Source, c.proto.LineDefined, c.proto.LastLineDefined)
 			self.callLuaClosure(nArgs, nResults, c)

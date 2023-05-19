@@ -67,6 +67,15 @@ type LuaState interface {
 	SetGlobal(name string)
 	GetGlobal(name string) LuaType
 	Register(name string, f GoFunction)
+	/*meta Method*/
+	GetMetaTable(idx int) bool
+	SetMetaTable(idx int)
+	RawLen(idx int)
+	RawEqual(idx1,idx2 int) bool
+	RawGet(idx int) LuaType
+	RawSet(idx int)
+	RawGetI(idx int, i int64) LuaType
+	RawSetI(idx int, i int64)
 	/**/
 	PrintTable(idx int)
 }

@@ -56,3 +56,31 @@ func convertToInteger(val luaValue) (int64, bool) {
 	default:				return 0, false
 	}
 }
+
+func setMateTable(val luaValue, mt *luaTable, ls *luaState) {
+	if t, ok := val.(*luaTable); ok {
+		t.metaTable = mt
+		return
+	}
+
+	key := fmt.Sprintf("_MT%d", typeOf(val))
+	ls.registry.put(key, mt)
+}
+
+func getMateTable(val luaValue, ls *luaState) *luaTable {
+	if t, ok := val.(*luaTable); ok {
+		return t.metaTable
+	}
+	key := fmt.Sprintf("_MT%d", typeOf(val))
+	if mt := ls.registry.get(key); mt != nil {
+		return mt.(*luaTable)
+	}
+	return nil
+}
+
+func getMetaField(val luaValue, filedName string, ls *luaState) luaValue {
+	if mt := getMateTable(val, ls); mt != nil {
+		return mt.get(filedName)
+	}
+	return nil
+}

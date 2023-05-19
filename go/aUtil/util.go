@@ -1,23 +1,8 @@
 package aUtil
 
-import "main/api"
 import "fmt"
 import "main/binChunk"
 import "main/vm"
-
-func PrintStack(vm api.LuaVM) {
-	top := vm.GetTop()
-	for i := 1; i <= top; i++ {
-	   t := vm.Type(i)
-	   switch t {
-	   case api.LUA_TBOOLEAN:      fmt.Printf("[%t]", vm.ToBoolean(i))
-	   case api.LUA_TNUMBER:       fmt.Printf("[%g]", vm.ToNumber(i))
-	   case api.LUA_TSTRING:       fmt.Printf("[%q]", vm.ToString(i))
-	   default:                fmt.Printf("[%s]", vm.TypeName(t))
-	   }
-	}
-	fmt.Println("\n")
-}
 
 func PrintProto(f *binChunk.Prototype) {
 	printHeader(f)
@@ -130,4 +115,8 @@ func constantsToString(k interface{}) string {
 	   return f.UpValuesNames[idx]
 	}
 	return "-"
+}
+
+func GoPrint(s string) {
+	
 }

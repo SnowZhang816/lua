@@ -28,25 +28,26 @@ var (
 )
 
 type operator struct {
+	metaMethod		string
 	integerFunc 	func (int64, int64) int64
 	floatFunc 		func (float64, float64) float64
 }
 
 var operators = []operator{
-	operator{iadd, 	fadd},
-	operator{isub, 	fsub},
-	operator{imul, 	fmul},
-	operator{imod, 	fmod},
-	operator{nil, 	pow},
-	operator{nil, 	div},
-	operator{iidiv, fidiv},
-	operator{band, 	nil},
-	operator{bor, 	nil},
-	operator{bxor, 	nil},
-	operator{shl, 	nil},
-	operator{shr, 	nil},
-	operator{iunm, 	funm},
-	operator{bnot, 	nil},
+	operator{"__add", 	iadd, 	fadd},
+	operator{"__sub", 	isub, 	fsub},
+	operator{"__mul", 	imul, 	fmul},
+	operator{"__mod", 	imod, 	fmod},
+	operator{"__pow", 	nil, 	pow},
+	operator{"__div", 	nil, 	div},
+	operator{"__idiv", 	iidiv, fidiv},
+	operator{"__band", 	band, 	nil},
+	operator{"__bor", 	bor, 	nil},
+	operator{"__bxor", 	bxor, 	nil},
+	operator{"__shl", 	shl, 	nil},
+	operator{"__shr", 	shr, 	nil},
+	operator{"__unm", 	iunm, 	funm},
+	operator{"__bnot", 	bnot, 	nil},
 }
 
 func _arith(a, b luaValue, op operator) luaValue {
@@ -73,6 +74,22 @@ func _arith(a, b luaValue, op operator) luaValue {
 	return nil
 }
 
+func callMetaMethod(a, b luaValue, mmName string, ls *luaState) (luaValue, bool) {
+	var mm luaValue
+	if mm = getMetaField(a, mmName, ls); mm == nil {
+		if mm = getMetaField(b, mmName, ls); mm == nil {
+			return nil, false
+		}
+	}
+
+	ls.stack.check(4)
+	ls.stack.push(mm)
+	ls.stack.push(a)
+	ls.stack.push(b)
+	ls.Call(2,1)
+	return ls.stack.pop(), true
+}
+
 func (self *luaState) Arith(op api.ArithOp) {
 	var a luaValue
 	b := self.stack.pop()
@@ -86,7 +103,15 @@ func (self *luaState) Arith(op api.ArithOp) {
 
 	if result := _arith(a, b, operator); result != nil {
 		self.stack.push(result)
-	} else {
-		panic("arithmetic error!")
+		return
 	}
+
+	mm := operator.metaMethod
+
+	if result,ok := callMetaMethod(a, b, mm, self); ok {
+		self.stack.push(result)
+		return
+	}
+
+	panic("arithmetic error!")
 }

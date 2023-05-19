@@ -5,6 +5,7 @@ import "main/number"
 import "fmt"
 
 type luaTable struct {
+	metaTable *luaTable
 	arr []luaValue
 	_map map[luaValue]luaValue
 }
@@ -102,4 +103,8 @@ func (self *luaTable) put(key,val luaValue) {
 
 func (self *luaTable) len() int {
 	return len(self.arr)
+}
+
+func (self *luaTable) hasMetaField(fieldName string) bool {
+	return self.metaTable != nil && self.metaTable.get(fieldName) != nil
 }
