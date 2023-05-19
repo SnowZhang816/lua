@@ -25,7 +25,8 @@ func _fixStack(a int, vm api.LuaVM) {
 	vm.Rotate(vm.RegisterCount() + 1, x - a)
 }
 
-func _pushFuncAndArgs(a,b int, vm api.LuaVM) (nArgs int) {
+func _pushFuncAndArgs(a,b int, vm api.LuaVM) int {
+	fmt.Println("_pushFuncAndArgs", a, b)
 	if b >= 1 {
 		vm.CheckStack(b)
 		for i := a; i < a + b; i++ {
@@ -34,7 +35,9 @@ func _pushFuncAndArgs(a,b int, vm api.LuaVM) (nArgs int) {
 		return b - 1
 	} else {
 		_fixStack(a, vm)
-		return vm.GetTop() - vm.RegisterCount() - 1
+		nArgs := vm.GetTop() - vm.RegisterCount() - 1
+		fmt.Println("_pushFuncAndArgs nArgs", nArgs, vm.GetTop(), vm.RegisterCount())
+		return nArgs
 	}
 }
 

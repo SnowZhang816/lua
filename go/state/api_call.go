@@ -82,12 +82,13 @@ func (self *luaState) callLuaClosure(nArgs, nResults int, c *closure) {
 }
 
 func (self *luaState) callGoClosure(nArgs, nResults int, c *closure) {
-	fmt.Println("callGoClosure", nArgs, nResults, &c.goFunc)
+	fmt.Println("callGoClosure", nArgs, nResults, c.goFunc)
 
 	newStack := newLuaStack(nArgs + api.LUA_MINSTACK, self)
 	newStack.closure = c
 
 	funcAndArgs := self.stack.popN(nArgs + 1)
+	fmt.Println("callGoClosure funcAndArgs", funcAndArgs)
 	newStack.pushN(funcAndArgs[1:], nArgs)
 
 	self.pushLuaStack(newStack)
