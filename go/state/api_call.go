@@ -43,7 +43,7 @@ func (self *luaState) runLuaClosure() {
 }
 
 func (self *luaState) callLuaClosure(nArgs, nResults int, c *closure) {
-	fmt.Println("callLuaClosure", nArgs, nResults, c)
+	fmt.Println("callLuaClosure", nArgs, nResults, &c.proto)
 
 	nRegs := int(c.proto.MaxStackSize)
 	nParams := int(c.proto.NumParams)
@@ -82,11 +82,13 @@ func (self *luaState) callLuaClosure(nArgs, nResults int, c *closure) {
 }
 
 func (self *luaState) callGoClosure(nArgs, nResults int, c *closure) {
+	fmt.Println("callGoClosure", nArgs, nResults, &c.goFunc)
+
 	newStack := newLuaStack(nArgs + api.LUA_MINSTACK, self)
 	newStack.closure = c
 
-	args := self.stack.popN(nArgs)
-	newStack.pushN(args, nArgs)
+	funcAndArgs := self.stack.popN(nArgs + 1)
+	newStack.pushN(funcAndArgs[1:], nArgs)
 
 	self.pushLuaStack(newStack)
 	r := c.goFunc(self)

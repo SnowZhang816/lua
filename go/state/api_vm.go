@@ -78,3 +78,7 @@ func (self *luaState) CloseUpValues(a int) {
 func (self *luaState) PrintStack() {
 	self.printStack()
 }
+
+func (self *luaState) PrintUpValues()  {
+	self.printUpValues()
+}

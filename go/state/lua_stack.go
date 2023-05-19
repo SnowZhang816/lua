@@ -177,20 +177,37 @@ func _typeName(val api.LuaType) string {
 	}
 }
 
+func _printLuaValue(val luaValue) {
+	t := typeOf(val)
+		switch t {
+		case api.LUA_TBOOLEAN:      	
+			fmt.Printf("[%t]", convertToBoolean(val))
+		case api.LUA_TNUMBER:
+			g,_ := convertToFloat(val)    	
+			fmt.Printf("[%g]", g)
+		case api.LUA_TSTRING:       	
+			fmt.Printf("[%q]", _toString(val))
+		case LUA_TFUNCTION:
+			closure := val.(*closure)
+			if closure.proto != nil {
+				fmt.Print("[LF(")
+				fmt.Print(&closure.proto)
+				fmt.Print(")]")
+			} else {
+				fmt.Print("[GF(")
+				fmt.Print(closure.goFunc)
+				fmt.Print(")]")
+			}			
+		default:                		
+			fmt.Printf("[%s]", _typeName(t))
+	}
+}
+
 func (self *luaStack)printStack(i int)  {
 	fmt.Printf("[%d] size[%d] top[%d] stack", i, len(self.slots), self.top)
 	for i := 0; i < self.top; i++ {
 		val := self.slots[i]
-	   	t :=  typeOf(val)
-	   	switch t {
-	   	case api.LUA_TBOOLEAN:      	fmt.Printf("[%t]", convertToBoolean(val))
-	   	case api.LUA_TNUMBER:
-			g,_ := convertToFloat(val)    	
-			fmt.Printf("[%g]", g)
-	   	case api.LUA_TSTRING:       	fmt.Printf("[%q]", _toString(val))
-		case LUA_TFUNCTION:				fmt.Printf("[%d]", val)
-	   	default:                		fmt.Printf("[%s]", _typeName(t))
-	   	}
+		_printLuaValue(val)
 	}
 	fmt.Println("\n")
 
@@ -198,4 +215,26 @@ func (self *luaStack)printStack(i int)  {
 		i += 1
 		self.prev.printStack(i)
 	}
+}
+
+func (self *luaStack)printUpValues() {
+	upValuesCount := len(self.closure.upValues)
+	fmt.Printf("upValues: size[%d] values", upValuesCount)
+	for i := 0; i < upValuesCount; i++ {
+		val := *(self.closure.upValues[i].val)
+		_printLuaValue(val)
+	}
+	fmt.Println()
+
+	openuvsCount := 0
+	if self.openuvs != nil {
+		openuvsCount = len(self.openuvs)
+	}
+	fmt.Printf("openuvs: size[%d] ", openuvsCount)
+	for i, openuv := range self.openuvs {
+		val := *openuv.val
+		fmt.Printf("[%d]-", i)
+		_printLuaValue(val)
+	}
+	fmt.Println()
 }

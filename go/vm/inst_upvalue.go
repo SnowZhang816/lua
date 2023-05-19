@@ -30,7 +30,7 @@ func getUpValue(i Instruction, vm api.LuaVM) {
 	fmt.Println("getUpValue", a, b)
 	a += 1
 	b += 1
-
+	vm.PrintUpValues()
 	vm.Copy(api.LuaUpValueIndex(b), a)
 }
 
@@ -41,4 +41,5 @@ func setUpValue(i Instruction, vm api.LuaVM) {
 	b += 1
 
 	vm.Copy(a, api.LuaUpValueIndex(b))
+	vm.PrintUpValues()
 }

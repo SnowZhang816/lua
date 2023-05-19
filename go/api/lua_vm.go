@@ -16,4 +16,5 @@ type LuaVM interface {
 
 
 	PrintStack()
+	PrintUpValues()
 }

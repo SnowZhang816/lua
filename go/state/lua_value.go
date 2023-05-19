@@ -2,6 +2,7 @@ package state
 
 import "main/api"
 import "main/number"
+import "fmt"
 
 type luaValue interface{}
 
@@ -14,7 +15,9 @@ func typeOf(val luaValue) api.LuaType {
 	case string:		return LUA_TSTRING
 	case *luaTable: 	return LUA_TTABLE
 	case *closure:		return LUA_TFUNCTION
-	default:			panic("todo!")
+	default:	
+		fmt.Println(val)		
+		panic("todo!")
 	}
 }
 

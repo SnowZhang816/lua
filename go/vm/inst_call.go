@@ -13,6 +13,7 @@ func closure(i Instruction, vm api.LuaVM) {
 }
 
 func _fixStack(a int, vm api.LuaVM) {
+	fmt.Println("_fixStack", a)
 	x := int(vm.ToInteger(-1))
 	vm.Pop(1)
 
@@ -20,6 +21,7 @@ func _fixStack(a int, vm api.LuaVM) {
 	for i := a; i < x; i++ {
 		vm.PushValue(i)
 	}
+	vm.PrintStack()
 	vm.Rotate(vm.RegisterCount() + 1, x - a)
 }
 
