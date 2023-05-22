@@ -1,7 +1,7 @@
 package vm
 
 import "main/api"
-import "fmt"
+import "main/cLog"
 
 type Instruction uint32
 
@@ -55,7 +55,7 @@ func (self Instruction) Execute(vm api.LuaVM) {
 	if action != nil {
 		action(self, vm)
 	} else {
-		desc,_ := fmt.Printf("[%s] Action is nil when execute instruction\n", self.OpName())
+		desc,_ := cLog.Printf("[%s] Action is nil when execute instruction\n", self.OpName())
 		panic(desc)
 	}
 }

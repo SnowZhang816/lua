@@ -1,7 +1,6 @@
 package binChunk
-import (
-	"fmt"
-)
+
+import "main/cLog"
 
 const (
 	LUA_SIGNATURE      	= 0x61754C1B//0x1B4C7561 //"\x1bLua"
@@ -75,11 +74,11 @@ type binaryChunk struct {
 
 func UnDump(data []byte) *Prototype {
 	reader := &reader{data}
-	fmt.Println("checkHeader===========")
+	cLog.Println("checkHeader===========")
 	reader.checkHeader()
-	fmt.Println("readByte===========")
+	cLog.Println("readByte===========")
 	reader.readByte()
-	fmt.Println("readProto===========")
+	cLog.Println("readProto===========")
 	return reader.readProto("")
 }
 

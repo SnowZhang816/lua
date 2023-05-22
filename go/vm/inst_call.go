@@ -1,11 +1,11 @@
 package vm
 
 import "main/api"
-import "fmt"
+import "main/cLog"
 
 func closure(i Instruction, vm api.LuaVM) {
 	a, bx := i.ABx()
-	fmt.Println("closure", a, bx)
+	cLog.Println("closure", a, bx)
 	a += 1
 
 	vm.LoadProto(bx)
@@ -13,7 +13,7 @@ func closure(i Instruction, vm api.LuaVM) {
 }
 
 func _fixStack(a int, vm api.LuaVM) {
-	fmt.Println("_fixStack", a)
+	cLog.Println("_fixStack", a)
 	x := int(vm.ToInteger(-1))
 	vm.Pop(1)
 
@@ -26,7 +26,7 @@ func _fixStack(a int, vm api.LuaVM) {
 }
 
 func _pushFuncAndArgs(a,b int, vm api.LuaVM) int {
-	fmt.Println("_pushFuncAndArgs", a, b)
+	cLog.Println("_pushFuncAndArgs", a, b)
 	if b >= 1 {
 		vm.CheckStack(b)
 		for i := a; i < a + b; i++ {
@@ -36,13 +36,13 @@ func _pushFuncAndArgs(a,b int, vm api.LuaVM) int {
 	} else {
 		_fixStack(a, vm)
 		nArgs := vm.GetTop() - vm.RegisterCount() - 1
-		fmt.Println("_pushFuncAndArgs nArgs", nArgs, vm.GetTop(), vm.RegisterCount())
+		cLog.Println("_pushFuncAndArgs nArgs", nArgs, vm.GetTop(), vm.RegisterCount())
 		return nArgs
 	}
 }
 
 func _popResults(a,c int, vm api.LuaVM) {
-	fmt.Println("_popResults", a, c)
+	cLog.Println("_popResults", a, c)
 	if c == 1 {
 		//no results
 	} else if c > 1 {
@@ -58,7 +58,7 @@ func _popResults(a,c int, vm api.LuaVM) {
 
 func call(i Instruction, vm api.LuaVM) {
 	a,b,c := i.ABC()
-	fmt.Println("call", a,b,c)
+	cLog.Println("call", a,b,c)
 	a += 1
 
 	nArgs := _pushFuncAndArgs(a, b, vm)
@@ -69,7 +69,7 @@ func call(i Instruction, vm api.LuaVM) {
 
 func _return(i Instruction, vm api.LuaVM) {
 	a,b,_ := i.ABC()
-	fmt.Println("_return", a, b)
+	cLog.Println("_return", a, b)
 	a += 1
 
 	if b == 1 {
@@ -86,7 +86,7 @@ func _return(i Instruction, vm api.LuaVM) {
 
 func vararg(i Instruction, vm api.LuaVM) {
 	a,b,_ := i.ABC()
-	fmt.Println("vararg", a,b)
+	cLog.Println("vararg", a,b)
 	a += 1
 
 	if b != 1 {
@@ -107,7 +107,7 @@ func tailCall(i Instruction, vm api.LuaVM) {
 
 func self(i Instruction, vm api.LuaVM) {
 	a,b,c := i.ABC()
-	fmt.Println("self", a,b,c)
+	cLog.Println("self", a,b,c)
 	a += 1
 	b += 1
 
@@ -120,7 +120,7 @@ func self(i Instruction, vm api.LuaVM) {
 
 func tForCall(i Instruction, vm api.LuaVM) {
 	a, _, c := i.ABC()
-	fmt.Println("tForCall", a, c)
+	cLog.Println("tForCall", a, c)
 	a += 1
 
 	_pushFuncAndArgs(a, 3, vm)
@@ -130,7 +130,7 @@ func tForCall(i Instruction, vm api.LuaVM) {
 
 func tForLoop(i Instruction, vm api.LuaVM) {
 	a, sBx := i.AsBx()
-	fmt.Println("tForLoop", a, sBx)
+	cLog.Println("tForLoop", a, sBx)
 	a += 1
 
 	if !vm.IsNil(a + 1) {

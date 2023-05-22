@@ -1,11 +1,11 @@
 package vm
 
 import "main/api"
-import "fmt"
+import "main/cLog"
 
 func loadNil(i Instruction, vm api.LuaVM) {
 	a,b,_ := i.ABC()
-	fmt.Println("loadNil", a,b)
+	cLog.Println("loadNil", a,b)
 	a += 1
 
 	vm.PushNil()
@@ -27,7 +27,7 @@ func loadBoolean(i Instruction, vm api.LuaVM) {
 
 func loadK(i Instruction, vm api.LuaVM) {
 	a, bx := i.ABx()
-	fmt.Println("loadK", a, bx)
+	cLog.Println("loadK", a, bx)
 	a += 1
 	vm.GetConst(bx)
 	vm.Replace(a)

@@ -1,7 +1,8 @@
 package state
 
-import "fmt"
 import "main/api"
+import "main/cLog"
+import "fmt"
 
 type luaStack struct {
 	slots 		[]luaValue
@@ -77,14 +78,14 @@ func (self *luaStack) isValid(idx int) bool {
 }
 
 func (self *luaStack) get(idx int) luaValue {
-	// fmt.Println("luaStack get", idx)
+	// cLog.Println("luaStack get", idx)
 	if idx < api.LUA_REGISTRY_INDEX {
 		uvIdx := api.LUA_REGISTRY_INDEX - idx - 1
 		c := self.closure
 		if c == nil || uvIdx >= len(c.upValues) {
 			return nil
 		}
-		// fmt.Println("luaStack get uvIdx", uvIdx)
+		// cLog.Println("luaStack get uvIdx", uvIdx)
 		return *(c.upValues[uvIdx].val)
 	}
 	if idx == api.LUA_REGISTRY_INDEX {
@@ -116,7 +117,7 @@ func (self *luaStack) set(idx int, val luaValue) {
 		self.slots[absIdx -1] = val
 		return
 	}
-	fmt.Println("invalid index", absIdx, self.top)
+	cLog.Println("invalid index", absIdx, self.top)
 	panic("invalid index")
 }
 
@@ -131,7 +132,7 @@ func (self *luaStack) reverse(from, to int) {
 }
 
 func (self *luaStack) pushN(vals []luaValue, n int) {
-	fmt.Println("pushN", vals, n)
+	cLog.Println("pushN", vals, n)
 	nVals := len(vals)
 	if n < 0 {
 		n = nVals
@@ -183,35 +184,35 @@ func _printLuaValue(val luaValue) {
 	t := typeOf(val)
 		switch t {
 		case api.LUA_TBOOLEAN:      	
-			fmt.Printf("[%t]", convertToBoolean(val))
+			cLog.Printf("[%t]", convertToBoolean(val))
 		case api.LUA_TNUMBER:
 			g,_ := convertToFloat(val)    	
-			fmt.Printf("[%g]", g)
+			cLog.Printf("[%g]", g)
 		case api.LUA_TSTRING:       	
-			fmt.Printf("[%q]", _toString(val))
+			cLog.Printf("[%q]", _toString(val))
 		case LUA_TFUNCTION:
 			closure := val.(*closure)
 			if closure.proto != nil {
-				fmt.Print("[LF(")
-				fmt.Print(&closure.proto)
-				fmt.Print(")]")
+				cLog.Print("[LF(")
+				cLog.Print(&closure.proto)
+				cLog.Print(")]")
 			} else {
-				fmt.Print("[GF(")
-				fmt.Print(closure.goFunc)
-				fmt.Print(")]")
+				cLog.Print("[GF(")
+				cLog.Print(closure.goFunc)
+				cLog.Print(")]")
 			}			
 		default:                		
-			fmt.Printf("[%s]", _typeName(t))
+			cLog.Printf("[%s]", _typeName(t))
 	}
 }
 
 func (self *luaStack)printStack(i int)  {
-	fmt.Printf("[%d] size[%d] top[%d] stack", i, len(self.slots), self.top)
+	cLog.Printf("[%d] size[%d] top[%d] stack", i, len(self.slots), self.top)
 	for i := 0; i < self.top; i++ {
 		val := self.slots[i]
 		_printLuaValue(val)
 	}
-	fmt.Println("\n")
+	cLog.Println("\n")
 
 	if self.prev != nil {
 		i += 1
@@ -221,22 +222,22 @@ func (self *luaStack)printStack(i int)  {
 
 func (self *luaStack)printUpValues() {
 	upValuesCount := len(self.closure.upValues)
-	fmt.Printf("upValues: size[%d] values", upValuesCount)
+	cLog.Printf("upValues: size[%d] values", upValuesCount)
 	for i := 0; i < upValuesCount; i++ {
 		val := *(self.closure.upValues[i].val)
 		_printLuaValue(val)
 	}
-	fmt.Println()
+	cLog.Println()
 
 	openuvsCount := 0
 	if self.openuvs != nil {
 		openuvsCount = len(self.openuvs)
 	}
-	fmt.Printf("openuvs: size[%d] ", openuvsCount)
+	cLog.Printf("openuvs: size[%d] ", openuvsCount)
 	for i, openuv := range self.openuvs {
 		val := *openuv.val
-		fmt.Printf("[%d]-", i)
+		cLog.Printf("[%d]-", i)
 		_printLuaValue(val)
 	}
-	fmt.Println()
+	cLog.Println()
 }

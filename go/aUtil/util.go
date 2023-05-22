@@ -1,8 +1,9 @@
 package aUtil
 
-import "fmt"
+import "main/cLog"
 import "main/binChunk"
 import "main/vm"
+import "fmt"
 
 func PrintProto(f *binChunk.Prototype) {
 	printHeader(f)
@@ -25,13 +26,13 @@ func printHeader(f *binChunk.Prototype) {
 	   varArgFlag = "+"
 	}
  
-	fmt.Printf("\n%s <%s:%d,%d> (%d instruction)\n", funcType, f.Source, f.LineDefined, f.LastLineDefined, len(f.Code))
-	fmt.Printf("%d%s params, %d slots, %d upvalues, ", f.NumParams, varArgFlag, f.MaxStackSize, len(f.UpValues))
-	fmt.Printf("%d locals, %d constants, %d functions\n", len(f.LocVars), len(f.Constants), len(f.Protos))
+	cLog.Printf("\n%s <%s:%d,%d> (%d instruction)\n", funcType, f.Source, f.LineDefined, f.LastLineDefined, len(f.Code))
+	cLog.Printf("%d%s params, %d slots, %d upvalues, ", f.NumParams, varArgFlag, f.MaxStackSize, len(f.UpValues))
+	cLog.Printf("%d locals, %d constants, %d functions\n", len(f.LocVars), len(f.Constants), len(f.Protos))
 }
 
 func printCode(f *binChunk.Prototype) {
-	// fmt.Println("printCode",f.Code,f.LineInfo)
+	// cLog.Println("printCode",f.Code,f.LineInfo)
 	for pc, c := range f.Code {
 	   line := "-"
 	   if len(f.LineInfo) > 0 {
@@ -39,9 +40,9 @@ func printCode(f *binChunk.Prototype) {
 	   }
  
 	   i := vm.Instruction(c)
-	   fmt.Printf("\t%d\t[%s]\t%s \t", pc + 1, line, i.OpName())
+	   cLog.Printf("\t%d\t[%s]\t%s \t", pc + 1, line, i.OpName())
 	   printOperands(i)
-	   fmt.Println("\n")
+	   cLog.Println("\n")
 	}
 }
 
@@ -49,53 +50,53 @@ func printOperands(i vm.Instruction) {
 	switch i.OpMode() {
 	case vm.IABC:
 	   a, b, c := i.ABC()
-	   fmt.Printf("%d", a)
+	   cLog.Printf("%d", a)
 	   if i.BMode() != vm.OpArgN {
 		  if b > 0xFF {
-			 fmt.Printf(" %d", -1-b&0xFF)
+			 cLog.Printf(" %d", -1-b&0xFF)
 		  } else {
-			 fmt.Printf(" %d", b)
+			 cLog.Printf(" %d", b)
 		  }
 	   }
 	   
 	   if i.CMode() != vm.OpArgN {
 		  if c > 0xFF {
-			 fmt.Printf(" %d", -1-c&0xFF)
+			 cLog.Printf(" %d", -1-c&0xFF)
 		  } else {
-			 fmt.Printf(" %d", c)
+			 cLog.Printf(" %d", c)
 		  }
 	   }
 	case vm.IABx:
 	   a, bx := i.ABx()
-	   fmt.Printf("%d", a)
+	   cLog.Printf("%d", a)
 	   if i.BMode() == vm.OPArgK {
-		  fmt.Printf(" %d", -1-bx)
+		  cLog.Printf(" %d", -1-bx)
 	   } else if i.BMode() == vm.OpArgU {
-		  fmt.Printf(" %d", bx)
+		  cLog.Printf(" %d", bx)
 	   }
 	case vm.IAsBx:
 	   a, sbx := i.AsBx()
-	   fmt.Printf("%d %d", a, sbx)
+	   cLog.Printf("%d %d", a, sbx)
 	case vm.IAx:
 	   ax := i.Ax()
-	   fmt.Printf("%d", -1 - ax)
+	   cLog.Printf("%d", -1 - ax)
 	}
 }
 
 func printDetail(f *binChunk.Prototype) {
-	fmt.Printf("constants (%d):\n", len(f.Constants))
+	cLog.Printf("constants (%d):\n", len(f.Constants))
 	for i, k := range f.Constants {
-	   fmt.Printf("\t%d\t%s\n", i+1, constantsToString(k))
+	   cLog.Printf("\t%d\t%s\n", i+1, constantsToString(k))
 	}
  
-	fmt.Printf("locals (%d):\n", len(f.LocVars))
+	cLog.Printf("locals (%d):\n", len(f.LocVars))
 	for i, locVar := range f.LocVars {
-	   fmt.Printf("\t%d\t%s\t\t%d\t%d\n", i, locVar.VarName, locVar.StartPC, locVar.EndPC)
+	   cLog.Printf("\t%d\t%s\t\t%d\t%d\n", i, locVar.VarName, locVar.StartPC, locVar.EndPC)
 	}
  
-	fmt.Printf("upValues (%d):\n", len(f.UpValues))
+	cLog.Printf("upValues (%d):\n", len(f.UpValues))
 	for i, upValue := range f.UpValues {
-	   fmt.Printf("\t%d\t%s\t%d\t%d\n", i, upValName(f, i), upValue.InStack, upValue.Idx)
+	   cLog.Printf("\t%d\t%s\t%d\t%d\n", i, upValName(f, i), upValue.InStack, upValue.Idx)
 	}
 }
 

@@ -8,12 +8,13 @@ import (
    "unsafe"
    "bytes"
    "encoding/binary"
+   "main/cLog"
 )
 
 import "main/api"
 
 func main() {
-   fmt.Println("Hello World!")
+   cLog.Println("Hello World!","dsadsa","dasdas")
    checkEndian()
 
    if len(os.Args) > 1 {
@@ -59,9 +60,9 @@ func checkEndian() {
    pointer := unsafe.Pointer(&value)
    pb := (*byte)(pointer)
    if *pb != 1{
-     fmt.Println("大端模式")
+     cLog.Println("大端模式")
    }
-   fmt.Println("小端模式")
+   cLog.Println("小端模式")
 }
 
 func print(ls api.LuaState) int {
@@ -96,7 +97,7 @@ func setMateTable(ls api.LuaState) int {
 }
 
 func next(ls api.LuaState) int {
-   fmt.Println("next")
+   cLog.Println("next")
    ls.SetTop(2)
    if ls.Next(1) {
       ls.PrintStack()
@@ -112,13 +113,13 @@ func pairs(ls api.LuaState) int {
    ls.PushGoFunction(next, 0)
    ls.PushValue(1)
    ls.PushNil()
-   fmt.Println("pairs")
+   cLog.Println("pairs")
    ls.PrintStack()
    return 3
 }
 
 func _iPairsAux(ls api.LuaState) int {
-   fmt.Println("_iPairsAux")
+   cLog.Println("_iPairsAux")
    i := ls.ToInteger(2) + 1
    ls.PushInteger(i)
    if ls.GetI(1, i) == api.LUA_TNIL {
@@ -133,7 +134,7 @@ func ipairs(ls api.LuaState) int {
    ls.PushGoFunction(_iPairsAux, 0)
    ls.PushValue(1)
    ls.PushInteger(0)
-   fmt.Println("ipairs")
+   cLog.Println("ipairs")
    ls.PrintStack()
    return 3
 }

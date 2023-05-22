@@ -1,6 +1,6 @@
 package state
 
-import "fmt"
+import "main/cLog"
 
 func (self *luaState) PC() int {
 	return self.stack.pc
@@ -31,7 +31,7 @@ func (self *luaState) GetRK(rk int) {
 
 func (self *luaState) LoadProto(idx int) {
 	proto := self.stack.closure.proto.Protos[idx]
-	fmt.Printf("LoadProto[%d] %s<%d-%d>\n", idx, proto.Source, proto.LineDefined, proto.LastLineDefined)
+	cLog.Printf("LoadProto[%d] %s<%d-%d>\n", idx, proto.Source, proto.LineDefined, proto.LastLineDefined)
 	closure := newLuaClosure(proto)
 	self.stack.push(closure)
 

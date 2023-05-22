@@ -1,7 +1,7 @@
 package vm
 
 import "main/api"
-import "fmt"
+import "main/cLog"
 
 const LFIELDS_PER_FLUSH = 50
 
@@ -9,7 +9,7 @@ func newTable(i Instruction, vm api.LuaVM) {
 	a, b, c := i.ABC()
 	a += 1
 
-	fmt.Println("vm newTable", a, b, c)
+	cLog.Println("vm newTable", a, b, c)
 
 	vm.CreateTable(Fb2int(b), Fb2int(c))
 	vm.Replace(a)
@@ -17,7 +17,7 @@ func newTable(i Instruction, vm api.LuaVM) {
 
 func getTable(i Instruction, vm api.LuaVM) {
 	a, b, c := i.ABC()
-	fmt.Println("getTable", a, b, c)
+	cLog.Println("getTable", a, b, c)
 	a += 1
 	b += 1
 
@@ -39,7 +39,7 @@ func setTable(i Instruction, vm api.LuaVM) {
 
 func setList(i Instruction, vm api.LuaVM) {
 	a, b, c := i.ABC()
-	fmt.Println("setList", a, b, c)
+	cLog.Println("setList", a, b, c)
 	a += 1
 
 	bIsZero := b == 0
@@ -59,7 +59,7 @@ func setList(i Instruction, vm api.LuaVM) {
 		idx++
 		vm.PushValue(a + j)
 		vm.PrintStack()
-		fmt.Println(a, idx)
+		cLog.Println(a, idx)
 		vm.SetI(a, idx)
 	}
 

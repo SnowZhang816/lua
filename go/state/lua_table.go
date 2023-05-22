@@ -2,7 +2,7 @@ package state
 
 import "math"
 import "main/number"
-import "fmt"
+import "main/cLog"
 
 type luaTable struct {
 	metaTable *luaTable
@@ -127,7 +127,7 @@ func (self *luaTable) initKeys() {
 		}
 	}
 
-	fmt.Println("initKeys", self.keys)
+	cLog.Println("initKeys", self.keys)
 }
 
 func (self *luaTable) nextKey(key luaValue) luaValue {

@@ -1,11 +1,11 @@
 package vm
 
 import "main/api"
-import "fmt"
+import "main/cLog"
 
 func getTabUp(i Instruction, vm api.LuaVM) {
 	a, b, c := i.ABC()
-	fmt.Println("getTabUp", a, b, c)
+	cLog.Println("getTabUp", a, b, c)
 	a += 1
 	b += 1
 
@@ -16,7 +16,7 @@ func getTabUp(i Instruction, vm api.LuaVM) {
 
 func setTabUp(i Instruction, vm api.LuaVM) {
 	a, b, c := i.ABC()
-	fmt.Println("setTabUp", a, b, c)
+	cLog.Println("setTabUp", a, b, c)
 	a += 1
 
 	vm.GetRK(b)
@@ -27,7 +27,7 @@ func setTabUp(i Instruction, vm api.LuaVM) {
 
 func getUpValue(i Instruction, vm api.LuaVM) {
 	a, b, _ := i.ABC()
-	fmt.Println("getUpValue", a, b)
+	cLog.Println("getUpValue", a, b)
 	a += 1
 	b += 1
 	vm.PrintUpValues()
@@ -36,7 +36,7 @@ func getUpValue(i Instruction, vm api.LuaVM) {
 
 func setUpValue(i Instruction, vm api.LuaVM) {
 	a, b, _ := i.ABC()
-	fmt.Println("setUpValue", a, b)
+	cLog.Println("setUpValue", a, b)
 	a += 1
 	b += 1
 

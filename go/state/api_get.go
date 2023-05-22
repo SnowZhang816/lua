@@ -1,7 +1,7 @@
 package state
 
 import "main/api"
-import "fmt"
+import "main/cLog"
 
 func (self *luaState) CreateTable(nArr, nRec int) {
 	t := newLuaTable(nArr, nRec)
@@ -14,11 +14,11 @@ func (self *luaState) NewTable() {
 }
 
 func (self *luaState) getTable(t,k luaValue, raw bool) api.LuaType {
-	fmt.Println("getTable", t, k)
+	cLog.Println("getTable", t, k)
 	if tbl,ok := t.(*luaTable); ok {
 		v := tbl.get(k)
 		if raw || v != nil || !tbl.hasMetaField("__index") {
-			fmt.Println("getTable", v)
+			cLog.Println("getTable", v)
 			self.stack.push(v)
 			return typeOf(v)
 		}
@@ -93,8 +93,8 @@ func (self *luaState) GetMetaTable(idx int) bool {
 func (self *luaState) PrintTable(idx int) {
 	t := self.stack.get(idx)
 	if tbl,ok := t.(*luaTable); ok {
-		fmt.Println("PrintTable", tbl)
+		cLog.Println("PrintTable", tbl)
 	} else {
-		fmt.Println("PrintTable not a table")
+		cLog.Println("PrintTable not a table")
 	}
 }

@@ -1,7 +1,7 @@
 package state
 
-import "fmt"
 import "main/api"
+import "main/cLog"
 
 type luaState struct {
 	registry 		*luaTable
@@ -9,7 +9,7 @@ type luaState struct {
 }
 
 func New() *luaState {
-	fmt.Println("New luaState")
+	cLog.Println("New luaState")
 	registry := newLuaTable(0,0)
 	registry.put(api.LUA_RIDX_GLOBALS, newLuaTable(0,0))		//全局环境
 
@@ -20,13 +20,13 @@ func New() *luaState {
 }
 
 func (self *luaState) pushLuaStack(stack *luaStack) {
-	fmt.Println("pushLuaStack")
+	cLog.Println("pushLuaStack")
 	stack.prev = self.stack
 	self.stack = stack
 }
 
 func (self *luaState) popLuaStack() {
-	fmt.Println("popLuaStack")
+	cLog.Println("popLuaStack")
 	stack := self.stack
 	self.stack = stack.prev
 	stack.prev = nil

@@ -1,7 +1,6 @@
 package state
 
 import "main/api"
-// import "fmt"
 
 func (self *luaState) setTable(t,k,v luaValue, raw bool) {
 	if tbl,ok := t.(*luaTable); ok {
