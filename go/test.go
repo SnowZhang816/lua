@@ -24,8 +24,8 @@ func main() {
 
       ls := state.New()
       ls.Register("print", print)
-      ls.Register("getMateTable", getMateTable)
-      ls.Register("setMateTable", setMateTable)
+      ls.Register("getmateTable", getMateTable)
+      ls.Register("setmetatable", setMateTable)
       ls.Load(data, os.Args[1], "b")
       ls.Call(0, 0)
    }

@@ -63,21 +63,21 @@ function vector(x, y)
     return v
 end
 
--- mt.__add = function (v1, v2)
---     return vector(v1.x + v2.x, v1.y + v2.y)
--- end
+mt.__add = function (v1, v2)
+    return vector(v1.x + v2.x, v1.y + v2.y)
+end
 
--- mt.__sub = function (v1, v2)
---     return vector(v1.x - v2.x, v1.y - v2.y)
--- end
+mt.__sub = function (v1, v2)
+    return vector(v1.x - v2.x, v1.y - v2.y)
+end
 
--- mt.__mul = function (v1, n)
---     return vector(v1.x * n, v1.y * n)
--- end
+mt.__mul = function (v1, n)
+    return vector(v1.x * n, v1.y * n)
+end
 
--- mt.__eq = function (v1, v2)
---     return v1.x == v2.x and v1.y == v2.y
--- end
+mt.__eq = function (v1, v2)
+    return v1.x == v2.x and v1.y == v2.y
+end
 
 mt.__index = function (v,k)
     if k == "print" then
@@ -87,17 +87,16 @@ mt.__index = function (v,k)
     end
 end
 
--- mt.__call = function (v)
---     print("["..v.x..","..v.y.."]")
--- end
+mt.__call = function (v)
+    print("["..v.x..","..v.y.."]")
+end
 
 local v1 = vector(1,2)
 v1:print()
--- v1.print(v1)
--- local v2 = vector(3,4)
--- v2:print()
--- local v3 = v1 * 2
--- v3:print()
+local v2 = vector(3,4)
+v2:print()
+local v3 = v1 * 2
+v3:print()
 -- local v4 = v1 + v2
 -- v4:print()
 -- print(v1 == v2)

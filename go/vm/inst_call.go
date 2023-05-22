@@ -107,6 +107,7 @@ func tailCall(i Instruction, vm api.LuaVM) {
 
 func self(i Instruction, vm api.LuaVM) {
 	a,b,c := i.ABC()
+	fmt.Println("self", a,b,c)
 	a += 1
 	b += 1
 
@@ -114,4 +115,5 @@ func self(i Instruction, vm api.LuaVM) {
 	vm.GetRK(c)
 	vm.GetTable(b)
 	vm.Replace(a)
+	vm.PrintStack()
 }

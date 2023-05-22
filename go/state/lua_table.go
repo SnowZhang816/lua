@@ -2,7 +2,7 @@ package state
 
 import "math"
 import "main/number"
-import "fmt"
+// import "fmt"
 
 type luaTable struct {
 	metaTable *luaTable
@@ -33,7 +33,6 @@ func _floatToInteger(key luaValue) luaValue {
 
 func (self *luaTable) get(key luaValue) luaValue {
 	k := _floatToInteger(key)
-	fmt.Println("get", k, key)
 	if idx, ok := k.(int64); ok {
 		if idx >= 1 && idx <= int64(len(self.arr)) {
 			return self.arr[idx - 1]

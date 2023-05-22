@@ -92,6 +92,7 @@ func (self *luaState) callGoClosure(nArgs, nResults int, c *closure) {
 	newStack.pushN(funcAndArgs[1:], nArgs)
 
 	self.pushLuaStack(newStack)
+	self.printStack()
 	r := c.goFunc(self)
 	self.popLuaStack()
 
