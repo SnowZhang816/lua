@@ -4,7 +4,7 @@ type LuaType = int
 type ArithOp = int
 type CompareOP = int
 
-type LuaState interface {
+type BasicAPI interface {
 	/* basic stack manipulation */
 	GetTop() int
 	AbsIndex(idx int) int
@@ -40,6 +40,7 @@ type LuaState interface {
 	PushInteger(n int64)
 	PushNumber(n float64)
 	PushString(s string)
+	PushFString(fmt string, a ...interface{})
 	/* */
 	Arith(op ArithOp)
 	Compare(idx1, idx2 int, op CompareOP) bool
@@ -90,4 +91,9 @@ type GoFunction func(LuaState) int
 
 func LuaUpValueIndex(i int) int {
 	return LUA_REGISTRY_INDEX - i
+}
+
+type LuaState interface {
+	BasicAPI
+	AuxLib
 }

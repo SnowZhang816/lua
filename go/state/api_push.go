@@ -24,6 +24,11 @@ func (self *luaState) PushString(s string) {
 	self.stack.push(s)
 }
 
+func (self *luaState) PushFString(fmtStr string, a ...interface{}) {
+	s := fmt.Sprintf(fmtStr, a...)
+	self.stack.push(s)
+}
+
 func (self *luaState) PushGoFunction(f api.GoFunction, n int) {
 	gClosure := newGoClosure(f, n)
 	for i := n; i > 0; i-- {

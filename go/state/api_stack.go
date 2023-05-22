@@ -13,6 +13,16 @@ func (self *luaState) CheckStack(n int) bool {
 	return true
 }
 
+func (self *luaState) CheckStack2(sz int, msg string) {
+	if !self.CheckStack(sz) {
+		if msg != "" {
+			self.Error2("stack overflow (%s)", msg)
+		} else {
+			self.Error2("stack overflow")
+		}
+	}
+}
+
 func (self *luaState) Pop(n int) {
 	for i := 0; i < n; i ++{
 		self.stack.pop()

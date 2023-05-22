@@ -4,6 +4,7 @@ const LUA_MINSTACK = 20
 const LUA_MAXSTACK = 1000000
 const LUA_REGISTRY_INDEX = -LUA_MAXSTACK - 1000
 const LUA_RIDX_GLOBALS int64 = 2
+const LUA_MULTRET = -1
 
 const (
 	LUA_TNONE = iota - 1

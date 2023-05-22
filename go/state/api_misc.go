@@ -16,6 +16,16 @@ func (self *luaState) Len(idx int) {
 	}
 }
 
+func (self *luaState) Len2(idx int) int64 {
+	self.Len(idx)
+	i, isNum := self.ToIntegerX(-1)
+	if !isNum {
+		self.Error2("object length is not a integer!")
+	}
+	self.Pop(1)
+	return i
+}
+
 func (self *luaState) RawLen(idx int) {
 	val := self.stack.get(idx)
 	if s, ok := val.(string); ok {
@@ -71,4 +81,80 @@ func (self *luaState) Next(idx int) bool {
 func (self *luaState) Error() int {
 	err := self.stack.pop()
 	panic(err)
+}
+
+func (self *luaState) Error2(fmt string, a ...interface{}) int {
+	self.PushFString(fmt, a...)
+	return self.Error()
+}
+
+func (self *luaState) ArgError(arg int, extraMsg string) int {
+	return self.Error2("bad argument #%d (%s)", arg, extraMsg)
+}
+
+func (self *luaState) ArgCheck(cond bool, arg int, extraMsg string) {
+	if !cond {
+		self.ArgError(arg, extraMsg)
+	}
+}
+
+func (self *luaState) CheckAny(arg int) {
+	if self.Type(arg) == LUA_TNONE {
+		self.ArgError(arg, "value expected")
+	}
+}
+
+func tagError(arg int, t LuaType) {
+	self.Error2("%s expected, got %s", self.TypeName(t), self.TypeName2(arg))
+}
+
+func (self *luaState) CheckType(arg int, t LuaType) {
+	if self.Type(arg) != t {
+		self.tagError(arg, t)
+	}
+}
+
+func (self *luaState) CheckInteger(arg int, t LuaType) int64 {
+	i, ok := self.ToIntegerX(arg)
+	if !ok {
+		self.tagError(arg, LUA_TNUMBER)
+	}
+	return i
+}
+
+func (self *luaState) CheckNumber(arg int, t LuaType) float64 {
+	f, ok := self.ToNumberX(arg)
+	if !ok {
+		self.tagError(arg, LUA_TNUMBER)
+	}
+	return f
+}
+
+func (self *luaState) CheckString(arg int, t LuaType) string {
+	s, ok := self.ToStringX(arg)
+	if !ok {
+		self.tagError(arg, LUA_TSTRING)
+	}
+	return s
+}
+
+func (self *luaState) OptInteger(arg int, d int64) int64 {
+	if self.IsNoneOrNil(d) {
+		return d
+	}
+	return self.CheckInteger(arg)
+}
+
+func (self *luaState) OptNumber(arg int, f float64) float64 {
+	if self.IsNoneOrNil(f) {
+		return f
+	}
+	return self.CheckNumber(arg)
+}
+
+func (self *luaState) OptString(arg int, s string) string {
+	if self.IsNoneOrNil(s) {
+		return s
+	}
+	return self.CheckString(arg)
 }
