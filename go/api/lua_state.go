@@ -77,7 +77,10 @@ type LuaState interface {
 	RawGetI(idx int, i int64) LuaType
 	RawSetI(idx int, i int64)
 	/**/
+	Next(idx int) bool
+	/**/
 	PrintTable(idx int)
+	PrintStack()
 }
 
 type GoFunction func(LuaState) int

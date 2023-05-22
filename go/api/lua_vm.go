@@ -13,8 +13,5 @@ type LuaVM interface {
 	CloseUpValues(a int)
 
 
-
-
-	PrintStack()
 	PrintUpValues()
 }

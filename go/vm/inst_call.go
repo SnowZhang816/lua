@@ -117,3 +117,24 @@ func self(i Instruction, vm api.LuaVM) {
 	vm.Replace(a)
 	vm.PrintStack()
 }
+
+func tForCall(i Instruction, vm api.LuaVM) {
+	a, _, c := i.ABC()
+	fmt.Println("tForCall", a, c)
+	a += 1
+
+	_pushFuncAndArgs(a, 3, vm)
+	vm.Call(2,c)
+	_popResults(a + 3, c + 1, vm)
+}
+
+func tForLoop(i Instruction, vm api.LuaVM) {
+	a, sBx := i.AsBx()
+	fmt.Println("tForLoop", a, sBx)
+	a += 1
+
+	if !vm.IsNil(a + 1) {
+		vm.Copy(a + 1, a)
+		vm.AddPC(sBx)
+	}
+}

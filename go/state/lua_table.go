@@ -2,12 +2,13 @@ package state
 
 import "math"
 import "main/number"
-// import "fmt"
+import "fmt"
 
 type luaTable struct {
 	metaTable *luaTable
 	arr []luaValue
 	_map map[luaValue]luaValue
+	keys map[luaValue]luaValue
 }
 
 func newLuaTable(nArr, nRec int) *luaTable {
@@ -106,4 +107,34 @@ func (self *luaTable) len() int {
 
 func (self *luaTable) hasMetaField(fieldName string) bool {
 	return self.metaTable != nil && self.metaTable.get(fieldName) != nil
+}
+
+func (self *luaTable) initKeys() {
+	self.keys = make(map[luaValue]luaValue, )
+
+	var key luaValue = nil
+	for i, v := range self.arr {
+		if v != nil {
+			self.keys[key] = int64(i + 1)
+			key = int64(i + 1)
+		}
+	}
+
+	for k,v := range self._map {
+		if v != nil {
+			self.keys[key] = k
+			key = k
+		}
+	}
+
+	fmt.Println("initKeys", self.keys)
+}
+
+func (self *luaTable) nextKey(key luaValue) luaValue {
+	if self.keys == nil || key == nil {
+		self.initKeys()
+		// self.changed = false
+	}
+
+	return self.keys[key]
 }
