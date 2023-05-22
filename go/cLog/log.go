@@ -11,7 +11,7 @@ const (
 
 const LOG_LEVEL = LOG_DEBUG
 
-const SHOW_LOG = false
+const SHOW_LOG = true
 
 func Println(a ...interface{}) (n int, err error) {
 	if SHOW_LOG {

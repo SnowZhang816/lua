@@ -79,6 +79,9 @@ type LuaState interface {
 	/**/
 	Next(idx int) bool
 	/**/
+	Error() int
+	PCall(nArgs, nResults, msgh int) int
+	/**/
 	PrintTable(idx int)
 	PrintStack()
 }

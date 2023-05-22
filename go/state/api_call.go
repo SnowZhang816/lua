@@ -5,6 +5,7 @@ import "main/aUtil"
 import "main/vm"
 import "main/api"
 import "main/cLog"
+import "fmt"
 
 func (self *luaState) Load(chunk []byte, chunkName, mode string) int {
 	proto := binChunk.UnDump(chunk)
@@ -22,7 +23,7 @@ func (self *luaState) Load(chunk []byte, chunkName, mode string) int {
 
 	self.printStack()
 
-	return 0
+	return api.LUA_OK
 }
 
 func (self *luaState) runLuaClosure() {
@@ -131,3 +132,24 @@ func (self *luaState) Call(nArgs, nResults int) {
 		panic("not function!")
 	}
 }
+
+func (self *luaState) PCall(nArgs, nResults, msgh int) (status int) {
+	caller := self.stack
+	status = api.LUA_ERRRUN
+
+	//catch err
+	defer func() {
+		if err := recover(); err != nil {
+			fmt.Println("PCall", err)
+			for self.stack != caller {
+				self.popLuaStack()
+			}
+			self.stack.push(err)
+		}
+	}()
+
+	self.Call(nArgs, nResults)
+	status = api.LUA_OK
+	return
+}
+

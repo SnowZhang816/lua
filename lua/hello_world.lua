@@ -109,7 +109,31 @@
 --     print(k,v)
 -- end
 
-t1 = {"a", "b", "c"}
-for k, v in ipairs(t1) do
-    print(k,v)
+-- t1 = {"a", "b", "c"}
+-- for k, v in ipairs(t1) do
+--     print(k,v)
+-- end
+
+--异常和错误处理
+function div0(a, b)
+    if b == 0 then
+        error("DIV BY ZERO!")
+    else
+        return a/b
+    end
 end
+
+function div1(a, b)
+    return div0(a,b)
+end
+
+function div2(a, b)
+    return div1(a,b)
+end
+
+ok, result = pcall(div0, 4, 0)
+print(ok, result)
+ok, err = pcall(div2, 5, 0)
+print(ok, err)
+ok, err = pcall(div2, {}, {})
+print(ok, err)
