@@ -15,7 +15,7 @@ func main() {
 
    if len(os.Args) > 1 {
       ls := state.New()
-      ls.PrintStack()
+      ls.PrintStack(true)
       ls.OpenLibs()
       ls.LoadFile(os.Args[1])
       ls.Call(0, -1)

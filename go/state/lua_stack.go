@@ -206,7 +206,7 @@ func _printLuaValue(val luaValue) {
 	}
 }
 
-func (self *luaStack)printStack(i int)  {
+func (self *luaStack)printStack(i int, loop bool)  {
 	cLog.Printf("[%d] size[%d] top[%d] stack", i, len(self.slots), self.top)
 	for i := 0; i < self.top; i++ {
 		val := self.slots[i]
@@ -214,9 +214,11 @@ func (self *luaStack)printStack(i int)  {
 	}
 	cLog.Println("\n")
 
-	if self.prev != nil {
-		i += 1
-		self.prev.printStack(i)
+	if loop {
+		if self.prev != nil {
+			i += 1
+			self.prev.printStack(i, loop)
+		}
 	}
 }
 

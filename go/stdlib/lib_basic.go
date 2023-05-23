@@ -82,9 +82,9 @@ func basePCall(ls api.LuaState) int {
 	nArgs := ls.GetTop() - 1
 	status := ls.PCall(nArgs, -1, 0)
 	ls.PushBoolean(status == api.LUA_OK)
-	ls.PrintStack()
+	ls.PrintStack(true)
 	ls.Insert(1)
-	ls.PrintStack()
+	ls.PrintStack(true)
 	return ls.GetTop()
 }
 
@@ -93,7 +93,7 @@ func _iPairsAux(ls api.LuaState) int {
 	i := ls.ToInteger(2) + 1
 	ls.PushInteger(i)
 	if ls.GetI(1, i) == api.LUA_TNIL {
-	   ls.PrintStack()
+	   ls.PrintStack(true)
 	   return 1
 	} else {
 	   return 2
@@ -105,7 +105,7 @@ func baseIPairs(ls api.LuaState) int {
 	ls.PushValue(1)
 	ls.PushInteger(0)
 	cLog.Println("ipairs")
-	ls.PrintStack()
+	ls.PrintStack(true)
 	return 3
 }
 
@@ -114,7 +114,7 @@ func basePairs(ls api.LuaState) int {
 	ls.PushValue(1)
 	ls.PushNil()
 	cLog.Println("pairs")
-	ls.PrintStack()
+	ls.PrintStack(true)
 	return 3
 }
 
@@ -122,11 +122,11 @@ func baseNext(ls api.LuaState) int {
 	cLog.Println("next")
 	ls.SetTop(2)
 	if ls.Next(1) {
-		ls.PrintStack()
+		ls.PrintStack(true)
 		return 2
 	} else {
 		ls.PushNil()
-		ls.PrintStack()
+		ls.PrintStack(true)
 		return 1
 	}
 }

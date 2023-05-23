@@ -35,8 +35,8 @@ func (self *luaState) popLuaStack() {
 	stack.prev = nil
 }
 
-func (self *luaState) printStack() {
-	self.stack.printStack(1)
+func (self *luaState) printStack(loop bool) {
+	self.stack.printStack(1, loop)
 }
 
 func (self *luaState)printUpValues() {

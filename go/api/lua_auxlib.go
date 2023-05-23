@@ -32,6 +32,7 @@ type AuxLib interface {
 	// CallMeta(obj int, e string) LuaType
 	OpenLibs()
 	RequireF(modename string, openf GoFunction, glb bool)
-	// NewLib(l FuncReg)
+	NewLib(l FuncReg)
 	SetFuncs(l FuncReg, nup int)
+	IsFunction(idx int) bool
 }

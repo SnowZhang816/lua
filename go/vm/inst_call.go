@@ -21,7 +21,7 @@ func _fixStack(a int, vm api.LuaVM) {
 	for i := a; i < x; i++ {
 		vm.PushValue(i)
 	}
-	vm.PrintStack()
+	vm.PrintStack(true)
 	vm.Rotate(vm.RegisterCount() + 1, x - a)
 }
 
@@ -49,7 +49,7 @@ func _popResults(a,c int, vm api.LuaVM) {
 		for i := a + c - 2; i >= a; i-- {
 			vm.Replace(i)
 		}
-		vm.PrintStack()
+		vm.PrintStack(true)
 	} else {
 		vm.CheckStack(1)
 		vm.PushInteger(int64(a))
@@ -62,7 +62,7 @@ func call(i Instruction, vm api.LuaVM) {
 	a += 1
 
 	nArgs := _pushFuncAndArgs(a, b, vm)
-	vm.PrintStack()
+	vm.PrintStack(true)
 	vm.Call(nArgs, c - 1)
 	_popResults(a, c, vm)
 }
@@ -115,7 +115,7 @@ func self(i Instruction, vm api.LuaVM) {
 	vm.GetRK(c)
 	vm.GetTable(b)
 	vm.Replace(a)
-	vm.PrintStack()
+	vm.PrintStack(true)
 }
 
 func tForCall(i Instruction, vm api.LuaVM) {

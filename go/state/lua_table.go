@@ -140,7 +140,7 @@ func (self *luaTable) nextKey(key luaValue) luaValue {
 }
 
 func (self *luaTable) printTable() {
-	cLog.Println(self)
+	// cLog.Println(self)
 	cLog.Print("table@")
 	cLog.Printf("%p", &self)
 	cLog.Print("[")

@@ -76,8 +76,12 @@ func (self *luaState) CloseUpValues(a int) {
 	}
 }
 
-func (self *luaState) PrintStack() {
-	self.printStack()
+func (self *luaState) PrintStack(loop bool) {
+	self.printStack(loop)
+}
+
+func (self *luaState) PrintRegister() {
+	self.printRegister()
 }
 
 func (self *luaState) PrintUpValues()  {

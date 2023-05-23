@@ -22,9 +22,9 @@ func getTable(i Instruction, vm api.LuaVM) {
 	b += 1
 
 	vm.GetRK(c)
-	vm.PrintStack()
+	vm.PrintStack(true)
 	vm.GetTable(b)
-	vm.PrintStack()
+	vm.PrintStack(true)
 	vm.Replace(a)
 }
 
@@ -58,7 +58,7 @@ func setList(i Instruction, vm api.LuaVM) {
 	for j := 1; j <= b; j++ {
 		idx++
 		vm.PushValue(a + j)
-		vm.PrintStack()
+		vm.PrintStack(true)
 		cLog.Println(a, idx)
 		vm.SetI(a, idx)
 	}

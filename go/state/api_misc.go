@@ -163,7 +163,11 @@ func (self *luaState) OptString(arg int, s string) string {
 
 func (self *luaState) OpenLibs() {
 	libs := map[string]api.GoFunction{
-		"_G" : stdlib.OpenBaseLib,
+		"_G": 		stdlib.OpenBaseLib,
+		"math":		stdlib.OpenMathLib,
+		"table":	stdlib.OpenTableLib,
+		"string":	stdlib.OpenStringLib,
+		"utf8":		stdlib.OpenUtf8Lib,
 	}
 
 	for name, fun := range libs {
@@ -206,4 +210,17 @@ func (self *luaState) SetFuncs(l api.FuncReg, nup int) {
 		self.PushGoFunction(fun, nup)
 		self.SetField(-2, name)
 	}
+}
+
+func (self *luaState) NewLib(l api.FuncReg) {
+	self.CreateTable(0, len(l))
+	self.SetFuncs(l, 0)
+}
+
+func (self *luaState) IsFunction(idx int) bool {
+	val := self.stack.get(idx)
+	if _, ok := val.(*closure); ok {
+		return true
+	}
+	return false
 }

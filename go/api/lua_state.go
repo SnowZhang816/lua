@@ -84,7 +84,8 @@ type BasicAPI interface {
 	PCall(nArgs, nResults, msgh int) int
 	/**/
 	PrintTable(idx int)
-	PrintStack()
+	PrintStack(loop bool)
+	PrintRegister()
 	PrintLoadedTable()
 	PrintGlobalTable()
 }

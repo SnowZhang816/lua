@@ -22,7 +22,7 @@ func (self *luaState) Load(chunk []byte, chunkName, mode string) int {
 		cLog.Println("Load upValues", c.upValues)
 	}
 
-	self.printStack()
+	self.printStack(true)
 
 	return api.LUA_OK
 }
@@ -59,7 +59,7 @@ func (self *luaState) runLuaClosure() {
 		// cLog.Printf("[%02d] %s start \n", pc+1, inst.OpName())
 		inst.Execute(self)
 		cLog.Printf("[%02d] %s end\n", pc+1, inst.OpName())
-		self.printStack()
+		self.printStack(true)
 
 		if inst.Opcode() == vm.OP_RETURN {
 			break
@@ -82,7 +82,7 @@ func (self *luaState) callLuaClosure(nArgs, nResults int, c *closure) {
 	funcAndArgs := self.stack.popN(nArgs + 1)
 
 	newStack.pushN(funcAndArgs[1:], nParams)
-	newStack.printStack(1)
+	newStack.printStack(1, false)
 	newStack.top = nRegs
 	if nArgs > nParams && isVarArg {
 		newStack.varargs = funcAndArgs[nParams + 1:]
@@ -90,19 +90,19 @@ func (self *luaState) callLuaClosure(nArgs, nResults int, c *closure) {
 	}
 
 	self.pushLuaStack(newStack)
-	self.printStack()
+	self.printStack(true)
 
 	self.runLuaClosure()
 	
 	self.popLuaStack()
-	self.printStack()
+	self.printStack(true)
 
 	if nResults != 0 {
 		cLog.Println("callLuaClosure nResults", nResults, newStack.top, nRegs, c.proto.Source, c.proto.LineDefined, c.proto.LastLineDefined)
 		results := newStack.popN(newStack.top - nRegs)
 		self.stack.check(len(results))
 		self.stack.pushN(results, nResults)
-		self.printStack()
+		self.printStack(true)
 	}
 }
 
@@ -117,7 +117,7 @@ func (self *luaState) callGoClosure(nArgs, nResults int, c *closure) {
 	newStack.pushN(funcAndArgs[1:], nArgs)
 
 	self.pushLuaStack(newStack)
-	self.printStack()
+	self.printStack(true)
 	r := c.goFunc(self)
 	self.popLuaStack()
 
@@ -126,7 +126,7 @@ func (self *luaState) callGoClosure(nArgs, nResults int, c *closure) {
 		results := newStack.popN(r)
 		self.stack.check(len(results))
 		self.stack.pushN(results, nResults)
-		self.printStack()
+		self.printStack(true)
 	}
 }
 
