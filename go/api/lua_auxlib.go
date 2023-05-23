@@ -25,13 +25,13 @@ type AuxLib interface {
 	LoadString(s string) int
 	/*Other functions*/
 	TypeName2(idx int) string
-	ToString2(idx int) string
+	// ToString2(idx int) string
 	Len2(idx int) int64
 	GetSubTable(idx int, fname string) bool
-	GetMateField(obj int, e string) LuaType
-	CallMeta(obj int, e string) LuaType
+	// GetMateField(obj int, e string) LuaType
+	// CallMeta(obj int, e string) LuaType
 	OpenLibs()
 	RequireF(modename string, openf GoFunction, glb bool)
-	NewLib(l FuncReg)
+	// NewLib(l FuncReg)
 	SetFuncs(l FuncReg, nup int)
 }

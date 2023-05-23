@@ -85,6 +85,8 @@ type BasicAPI interface {
 	/**/
 	PrintTable(idx int)
 	PrintStack()
+	PrintLoadedTable()
+	PrintGlobalTable()
 }
 
 type GoFunction func(LuaState) int

@@ -213,7 +213,7 @@ func (self *reader) readNumParams() byte {
 
 func (self *reader) readIsVarArg() byte {
 	isVarArg := self.readByte()
-	cLog.Println("readIsVarArg=======", isVarArg)
+	// cLog.Println("readIsVarArg=======", isVarArg)
 	return isVarArg
 }
 

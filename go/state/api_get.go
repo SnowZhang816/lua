@@ -14,11 +14,13 @@ func (self *luaState) NewTable() {
 }
 
 func (self *luaState) getTable(t,k luaValue, raw bool) api.LuaType {
-	cLog.Println("getTable", t, k)
+	// cLog.Println("getTable", t, k)
 	if tbl,ok := t.(*luaTable); ok {
+		// cLog.Println("getTable", k)
+		// tbl.printTable()
 		v := tbl.get(k)
 		if raw || v != nil || !tbl.hasMetaField("__index") {
-			cLog.Println("getTable", v)
+			// cLog.Println("getTable", v)
 			self.stack.push(v)
 			return typeOf(v)
 		}
@@ -90,10 +92,23 @@ func (self *luaState) GetMetaTable(idx int) bool {
 	return false
 }
 
+func (self *luaState) GetSubTable(idx int, fname string) bool {
+	cLog.Println("GetSubTable", idx, fname)
+	if self.GetField(idx, fname) == LUA_TTABLE {
+		return true
+	}
+	self.Pop(1)
+	idx = self.stack.absIndex(idx)
+	self.NewTable()
+	self.PushValue(-1)
+	self.SetField(idx, fname)
+	return false
+}
+
 func (self *luaState) PrintTable(idx int) {
 	t := self.stack.get(idx)
 	if tbl,ok := t.(*luaTable); ok {
-		cLog.Println("PrintTable", tbl)
+		tbl.printTable()
 	} else {
 		cLog.Println("PrintTable not a table")
 	}

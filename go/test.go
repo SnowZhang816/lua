@@ -1,9 +1,7 @@
 package main
 
 import (
-   "fmt"
    "main/state"
-   "io/ioutil"
    "os"
    "unsafe"
    "bytes"
@@ -11,28 +9,16 @@ import (
    "main/cLog"
 )
 
-import "main/api"
-
 func main() {
    cLog.Println("Hello World!","dsadsa","dasdas")
    checkEndian()
 
    if len(os.Args) > 1 {
-      data, err := ioutil.ReadFile(os.Args[1])
-      if err != nil {
-         panic(err)
-      }
-
       ls := state.New()
-      ls.Register("print", print)
-      ls.Register("getmateTable", getMateTable)
-      ls.Register("next", next)
-      ls.Register("pairs", pairs)
-      ls.Register("ipairs", ipairs)
-      ls.Register("error", error)
-      ls.Register("pcall", pCall)
-      ls.Load(data, os.Args[1], "b")
-      ls.Call(0, 0)
+      ls.PrintStack()
+      ls.OpenLibs()
+      ls.LoadFile(os.Args[1])
+      ls.Call(0, -1)
    }
 }
 
@@ -67,93 +53,5 @@ func checkEndian() {
    cLog.Println("小端模式")
 }
 
-func print(ls api.LuaState) int {
-   nArgs := ls.GetTop()
-   fmt.Printf("LUAPrint:")
-   for i := 1; i <= nArgs; i++ {
-      if ls.IsBoolean(i) {
-         fmt.Printf("%t", ls.ToBoolean(i))
-      } else if ls.IsString(i) {
-         fmt.Printf("%s", ls.ToString(i))
-      } else {
-         fmt.Printf("%s",ls.TypeName(ls.Type(i)))
-      }
-      if i < nArgs {
-         fmt.Print(" ")
-      }
-   }
-   fmt.Println()
-   return 0
-}
-
-func getMateTable(ls api.LuaState) int {
-   if ls.GetMetaTable(1) {
-      ls.PushNil()
-   }
-   return 1
-}
-
-func setMateTable(ls api.LuaState) int {
-   ls.SetMetaTable(1)
-   return 1
-}
-
-func next(ls api.LuaState) int {
-   cLog.Println("next")
-   ls.SetTop(2)
-   if ls.Next(1) {
-      ls.PrintStack()
-      return 2
-   } else {
-      ls.PushNil()
-      ls.PrintStack()
-      return 1
-   }
-}
-
-func pairs(ls api.LuaState) int {
-   ls.PushGoFunction(next, 0)
-   ls.PushValue(1)
-   ls.PushNil()
-   cLog.Println("pairs")
-   ls.PrintStack()
-   return 3
-}
-
-func _iPairsAux(ls api.LuaState) int {
-   cLog.Println("_iPairsAux")
-   i := ls.ToInteger(2) + 1
-   ls.PushInteger(i)
-   if ls.GetI(1, i) == api.LUA_TNIL {
-      ls.PrintStack()
-      return 1
-   } else {
-      return 2
-   }
-}
-
-func ipairs(ls api.LuaState) int {
-   ls.PushGoFunction(_iPairsAux, 0)
-   ls.PushValue(1)
-   ls.PushInteger(0)
-   cLog.Println("ipairs")
-   ls.PrintStack()
-   return 3
-}
-
-func error(ls api.LuaState) int {
-   return ls.Error()
-}
-
-func pCall(ls api.LuaState) int {
-   cLog.Println("pCall")
-   nArgs := ls.GetTop() - 1
-   status := ls.PCall(nArgs, -1, 0)
-   ls.PushBoolean(status == api.LUA_OK)
-   ls.PrintStack()
-   ls.Insert(1)
-   ls.PrintStack()
-   return ls.GetTop()
-}
 
 

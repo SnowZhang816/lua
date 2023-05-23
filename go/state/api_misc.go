@@ -1,7 +1,9 @@
 package state
 
 // import "fmt"
-// import "main/api"
+import "main/api"
+import "main/stdlib"
+import "main/cLog"
 
 func (self *luaState) Len(idx int) {
 	val := self.stack.get(idx)
@@ -104,57 +106,104 @@ func (self *luaState) CheckAny(arg int) {
 	}
 }
 
-func tagError(arg int, t LuaType) {
+func (self *luaState) tagError(arg int, t api.LuaType) {
 	self.Error2("%s expected, got %s", self.TypeName(t), self.TypeName2(arg))
 }
 
-func (self *luaState) CheckType(arg int, t LuaType) {
+func (self *luaState) CheckType(arg int, t api.LuaType) {
 	if self.Type(arg) != t {
 		self.tagError(arg, t)
 	}
 }
 
-func (self *luaState) CheckInteger(arg int, t LuaType) int64 {
+func (self *luaState) CheckInteger(arg int) int64 {
 	i, ok := self.ToIntegerX(arg)
 	if !ok {
-		self.tagError(arg, LUA_TNUMBER)
+		self.tagError(arg, api.LUA_TNUMBER)
 	}
 	return i
 }
 
-func (self *luaState) CheckNumber(arg int, t LuaType) float64 {
+func (self *luaState) CheckNumber(arg int) float64 {
 	f, ok := self.ToNumberX(arg)
 	if !ok {
-		self.tagError(arg, LUA_TNUMBER)
+		self.tagError(arg, api.LUA_TNUMBER)
 	}
 	return f
 }
 
-func (self *luaState) CheckString(arg int, t LuaType) string {
+func (self *luaState) CheckString(arg int) string {
 	s, ok := self.ToStringX(arg)
 	if !ok {
-		self.tagError(arg, LUA_TSTRING)
+		self.tagError(arg, api.LUA_TSTRING)
 	}
 	return s
 }
 
 func (self *luaState) OptInteger(arg int, d int64) int64 {
-	if self.IsNoneOrNil(d) {
+	if self.IsNoneOrNil(arg) {
 		return d
 	}
 	return self.CheckInteger(arg)
 }
 
 func (self *luaState) OptNumber(arg int, f float64) float64 {
-	if self.IsNoneOrNil(f) {
+	if self.IsNoneOrNil(arg) {
 		return f
 	}
 	return self.CheckNumber(arg)
 }
 
 func (self *luaState) OptString(arg int, s string) string {
-	if self.IsNoneOrNil(s) {
+	if self.IsNoneOrNil(arg) {
 		return s
 	}
 	return self.CheckString(arg)
+}
+
+func (self *luaState) OpenLibs() {
+	libs := map[string]api.GoFunction{
+		"_G" : stdlib.OpenBaseLib,
+	}
+
+	for name, fun := range libs {
+		self.RequireF(name, fun, true)
+		self.Pop(1)
+	}
+}
+
+func (self *luaState) RequireF(modename string, openf api.GoFunction, glb bool) {
+	cLog.Println("RequireF", modename)
+	self.GetSubTable(api.LUA_REGISTRY_INDEX, "_LOADED")
+	self.GetField(-1, modename)			/*LOADED[modename]*/
+	if !self.ToBoolean(-1) {
+		self.Pop(1)
+		self.PushGoFunction(openf, 0)
+		self.PushString(modename)
+		self.Call(1,1)
+		self.PushValue(-1)
+		self.SetField(-3, modename)
+	}
+	cLog.Println("RequireF End")
+
+	self.Remove(-2)
+	if glb {
+		self.PushValue(-1)
+		self.GetGlobal(modename)
+	}
+}
+
+func (self *luaState) SetFuncs(l api.FuncReg, nup int) {
+	cLog.Println("SetFuncs")
+	self.CheckStack(nup)
+
+	for name, fun := range l {
+		cLog.Println("SetFuncs", name)
+		for i := 0; i < nup; i++ {
+			self.PushValue(-nup)
+		}
+
+		self.PushGoFunction(fun, nup)
+		self.SetField(-2, name)
+	}
 }

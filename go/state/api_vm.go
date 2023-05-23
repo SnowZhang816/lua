@@ -32,6 +32,7 @@ func (self *luaState) GetRK(rk int) {
 func (self *luaState) LoadProto(idx int) {
 	proto := self.stack.closure.proto.Protos[idx]
 	cLog.Printf("LoadProto[%d] %s<%d-%d>\n", idx, proto.Source, proto.LineDefined, proto.LastLineDefined)
+	cLog.Println(proto.UpValues)
 	closure := newLuaClosure(proto)
 	self.stack.push(closure)
 
@@ -81,4 +82,12 @@ func (self *luaState) PrintStack() {
 
 func (self *luaState) PrintUpValues()  {
 	self.printUpValues()
+}
+
+func (self *luaState) PrintLoadedTable()  {
+	self.printLoadedTable()
+}
+
+func (self *luaState) PrintGlobalTable()  {
+	self.printGlobalTable()
 }

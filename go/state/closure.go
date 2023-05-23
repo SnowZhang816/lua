@@ -15,11 +15,11 @@ type closure struct {
 }
 
 func newLuaClosure(proto *binChunk.Prototype) *closure {
-	cLog.Println("newLuaClosure")
 	c := &closure{proto: proto}
 	if nUpValue := len(proto.UpValues); nUpValue > 0 {
 		c.upValues = make([]*upValue, nUpValue)
 	}
+	cLog.Println("newLuaClosure", c.upValues)
 	return c
 }
 

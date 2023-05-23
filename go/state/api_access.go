@@ -122,7 +122,10 @@ func (self *luaState) ToStringX(idx int) (string, bool) {
 		s := fmt.Sprintf("%v", x)
 		self.stack.set(idx, s)
 		return s, true
-	default:					return "", false
+	default:				
+		s := fmt.Sprintf("%s:%p", self.TypeName(typeOf(val)), val)	
+		self.stack.set(idx, s)
+		return s, false
 	}
 }
 

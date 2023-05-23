@@ -138,3 +138,18 @@ func (self *luaTable) nextKey(key luaValue) luaValue {
 
 	return self.keys[key]
 }
+
+func (self *luaTable) printTable() {
+	cLog.Println(self)
+	cLog.Print("table@")
+	cLog.Printf("%p", &self)
+	cLog.Print("[")
+	cLog.Printf("metaTable:")
+	cLog.Print(self.metaTable)
+	cLog.Printf(" arr(%d):", len(self.arr))
+	cLog.Print(self.arr)
+	cLog.Printf(" _map:")
+	cLog.Print(self._map)
+	cLog.Print("]")
+	cLog.Println()
+}

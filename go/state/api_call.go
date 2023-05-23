@@ -33,20 +33,21 @@ func (self *luaState) LoadString(s string) int {
 
 func (self *luaState) LoadFileX(filename, mode string) int {
 	if data, err := ioutil.ReadFile(filename); err == nil {
-		return self.Load(data, "@" + fileName, mode)
+		return self.Load(data, "@" + filename, mode)
 	}
+	return api.LUA_ERRFILE
 }
 
 func (self *luaState) DoString(str string) bool {
-	return self.LoadString(str) == LUA_OK && self.PCall(0, LUA_MULTRET, 0) == LUA_OK
+	return self.LoadString(str) == api.LUA_OK && self.PCall(0, api.LUA_MULTRET, 0) == api.LUA_OK
 }
 
 func (self *luaState) LoadFile(filename string) int {
-	return self.LoadFileX(fileName, "bt")
+	return self.LoadFileX(filename, "bt")
 }
 
 func (self *luaState) DoFile(filename string) bool {
-	return self.LoadFile(filename) == LUA_OK && self.PCall(0, LUA_MULTRET, 0) == LUA_OK
+	return self.LoadFile(filename) == api.LUA_OK && self.PCall(0, api.LUA_MULTRET, 0) == api.LUA_OK
 }
 
 func (self *luaState) runLuaClosure() {
