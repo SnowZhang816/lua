@@ -40,10 +40,6 @@ func (self *luaState) Type(idx int) api.LuaType {
 	return LUA_TNONE
 }
 
-func (self *luaState) TypeName2(idx int) string {
-	return self.TypeName(self.Type(idx))
-}
-
 func (self *luaState) IsNone(idx int) bool {
 	return self.Type(idx) == LUA_TNONE
 }

@@ -101,7 +101,7 @@ func _iPairsAux(ls api.LuaState) int {
 }
 
 func baseIPairs(ls api.LuaState) int {
-	ls.PushGoFunction(_iPairsAux, 0)
+	ls.PushGoFunction(_iPairsAux)
 	ls.PushValue(1)
 	ls.PushInteger(0)
 	cLog.Println("ipairs")
@@ -110,7 +110,7 @@ func baseIPairs(ls api.LuaState) int {
 }
 
 func basePairs(ls api.LuaState) int {
-	ls.PushGoFunction(baseNext, 0)
+	ls.PushGoFunction(baseNext)
 	ls.PushValue(1)
 	ls.PushNil()
 	cLog.Println("pairs")

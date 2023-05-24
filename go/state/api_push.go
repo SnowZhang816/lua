@@ -30,13 +30,18 @@ func (self *luaState) PushFString(fmtStr string, a ...interface{}) {
 	self.stack.push(s)
 }
 
-func (self *luaState) PushGoFunction(f api.GoFunction, n int) {
+func (self *luaState) PushGoFunction(f api.GoFunction) {
+	gClosure := newGoClosure(f, 0)
+	self.stack.push(gClosure)
+}
+
+func (self *luaState) PushGoClosure(f api.GoFunction, n int) {
 	gClosure := newGoClosure(f, n)
 	for i := n; i > 0; i-- {
-		val := self.stack.pop()
+		val := self.stack.pop()		
 		gClosure.upValues[n - 1] = &upValue{&val}
 	}
-	self.stack.push(gClosure)
+	self.stack.push(gClosure)	
 }
 
 func (self *luaState) PushGlobalTable() {

@@ -60,7 +60,8 @@ type BasicAPI interface {
 	Load(chunk []byte, chunkName, mode string) int
 	Call(nArgs, nResults int)
 	/*Go Function*/
-	PushGoFunction(f GoFunction, n int)
+	PushGoFunction(f GoFunction)
+	PushGoClosure(f GoFunction, n int)
 	IsGoFunction(idx int) bool
 	ToGoFunction(idx int) GoFunction
 	/*Global table operator*/

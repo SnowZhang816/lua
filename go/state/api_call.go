@@ -6,7 +6,6 @@ import "main/vm"
 import "main/api"
 import "main/cLog"
 import "fmt"
-import "io/ioutil"
 
 func (self *luaState) Load(chunk []byte, chunkName, mode string) int {
 	proto := binChunk.UnDump(chunk)
@@ -25,29 +24,6 @@ func (self *luaState) Load(chunk []byte, chunkName, mode string) int {
 	self.printStack(true)
 
 	return api.LUA_OK
-}
-
-func (self *luaState) LoadString(s string) int {
-	return self.Load([]byte(s), s, "bt")
-}
-
-func (self *luaState) LoadFileX(filename, mode string) int {
-	if data, err := ioutil.ReadFile(filename); err == nil {
-		return self.Load(data, "@" + filename, mode)
-	}
-	return api.LUA_ERRFILE
-}
-
-func (self *luaState) DoString(str string) bool {
-	return self.LoadString(str) == api.LUA_OK && self.PCall(0, api.LUA_MULTRET, 0) == api.LUA_OK
-}
-
-func (self *luaState) LoadFile(filename string) int {
-	return self.LoadFileX(filename, "bt")
-}
-
-func (self *luaState) DoFile(filename string) bool {
-	return self.LoadFile(filename) == api.LUA_OK && self.PCall(0, api.LUA_MULTRET, 0) == api.LUA_OK
 }
 
 func (self *luaState) runLuaClosure() {

@@ -115,13 +115,13 @@
 -- end
 
 --异常和错误处理
-function div0(a, b)
-    if b == 0 then
-        error("DIV BY ZERO!")
-    else
-        return a/b
-    end
-end
+-- function div0(a, b)
+--     if b == 0 then
+--         error("DIV BY ZERO!")
+--     else
+--         return a/b
+--     end
+-- end
 
 -- function div1(a, b)
 --     return div0(a,b)
@@ -131,9 +131,18 @@ end
 --     return div1(a,b)
 -- end
 
-ok, result = pcall(div0, 4, 0)
-print(ok, result)
+-- ok, result = pcall(div0, 4, 0)
+-- print(ok, result)
 -- ok, err = pcall(div2, 5, 0)
 -- print(ok, err)
 -- ok, err = pcall(div2, {}, {})
 -- print(ok, err)
+
+--模块加载测试
+local t = {}
+
+t.foo = function ()
+    print("foo")
+end
+
+return t

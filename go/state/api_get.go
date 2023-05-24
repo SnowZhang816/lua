@@ -92,19 +92,6 @@ func (self *luaState) GetMetaTable(idx int) bool {
 	return false
 }
 
-func (self *luaState) GetSubTable(idx int, fname string) bool {
-	cLog.Println("GetSubTable", idx, fname)
-	if self.GetField(idx, fname) == LUA_TTABLE {
-		return true
-	}
-	self.Pop(1)
-	idx = self.stack.absIndex(idx)
-	self.NewTable()
-	self.PushValue(-1)
-	self.SetField(idx, fname)
-	return false
-}
-
 func (self *luaState) PrintTable(idx int) {
 	t := self.stack.get(idx)
 	if tbl,ok := t.(*luaTable); ok {
