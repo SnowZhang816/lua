@@ -132,3 +132,13 @@ func (self *luaState) ToGoFunction(idx int) api.GoFunction {
 	}
 	return nil
 }
+
+func (self *luaState) ToThread(idx int) api.LuaState {
+	val := self.stack.get(idx)
+	if val != nil {
+		if ls,ok := val.(*luaState); ok {
+			return ls
+		}
+	}
+	return nil
+}

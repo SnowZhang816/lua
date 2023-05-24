@@ -1,5 +1,7 @@
 package state
 
+import "main/api"
+
 func (self *luaState) GetTop() int {
 	return self.stack.top
 }
@@ -74,4 +76,9 @@ func (self *luaState) SetTop(idx int) {
 			self.stack.push(nil)
 		}
 	}
+}
+
+func (self *luaState) XMove(to api.LuaState, n int) {
+	vals := self.stack.popN(n)
+	to.(*luaState).stack.pushN(vals, n)
 }

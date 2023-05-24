@@ -89,6 +89,17 @@ type BasicAPI interface {
 	PrintRegister()
 	PrintLoadedTable()
 	PrintGlobalTable()
+
+	/*thread*/
+	NewThread() LuaState
+	Resume(from LuaState, nArgs int) int
+	Yield(nResults int) int
+	Status() int
+	IsYieldAble() bool
+	ToThread(idx int) LuaState
+	PushThread() bool
+	XMove(to LuaState, n int)
+	GetStack() bool
 }
 
 type GoFunction func(LuaState) int

@@ -16,6 +16,7 @@ func typeOf(val luaValue) api.LuaType {
 	case string:		return LUA_TSTRING
 	case *luaTable: 	return LUA_TTABLE
 	case *closure:		return LUA_TFUNCTION
+	case *luaState:		return LUA_TTHREAD
 	default:	
 		cLog.Println(val)		
 		panic("todo!")

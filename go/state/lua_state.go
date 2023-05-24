@@ -6,18 +6,24 @@ import "main/cLog"
 type luaState struct {
 	registry 		*luaTable
 	stack 			*luaStack
+
+	coStatus		int
+	coCaller		*luaState
+	coChan			chan int
 }
 
 func New() *luaState {
 	cLog.Println("New luaState")
-	registry := newLuaTable(0,0)
-	registry.put(api.LUA_RIDX_GLOBALS, newLuaTable(0,0))		//全局环境
 
-	ls :=  &luaState{registry : registry,}
+	ls := &luaState{}
 
-	ls.registry.printTable()
+	registry := newLuaTable(8,0)
+	registry.put(api.LUA_RIDX_MAINTHREAD, ls)					//
+	registry.put(api.LUA_RIDX_GLOBALS, newLuaTable(0,20))		//全局环境
 
+	ls.registry = registry
 	ls.pushLuaStack(newLuaStack(api.LUA_MINSTACK, ls))
+	ls.registry.printTable()
 
 	return ls
 }
@@ -33,6 +39,10 @@ func (self *luaState) popLuaStack() {
 	stack := self.stack
 	self.stack = stack.prev
 	stack.prev = nil
+}
+
+func (self *luaState) isMainThread() bool {
+	return self.registry.get(api.LUA_RIDX_MAINTHREAD) == self
 }
 
 func (self *luaState) printStack(loop bool) {

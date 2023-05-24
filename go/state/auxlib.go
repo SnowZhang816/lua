@@ -103,13 +103,14 @@ func (self *luaState) OptString(arg int, s string) string {
 
 func (self *luaState) OpenLibs() {
 	libs := map[string]api.GoFunction{
-		"_G": 		stdlib.OpenBaseLib,
-		"math":		stdlib.OpenMathLib,
-		"table":	stdlib.OpenTableLib,
-		"string":	stdlib.OpenStringLib,
-		"utf8":		stdlib.OpenUtf8Lib,
-		"os":		stdlib.OpenOsLib,
-		"package":	stdlib.OpenPackageLib,
+		"_G": 			stdlib.OpenBaseLib,
+		"math":			stdlib.OpenMathLib,
+		"table":		stdlib.OpenTableLib,
+		"string":		stdlib.OpenStringLib,
+		"utf8":			stdlib.OpenUtf8Lib,
+		"os":			stdlib.OpenOsLib,
+		"package":		stdlib.OpenPackageLib,
+		"coroutine":	stdlib.OpenCoroutineLib,
 	}
 
 	for name, fun := range libs {
