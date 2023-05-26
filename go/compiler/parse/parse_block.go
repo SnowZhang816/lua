@@ -1,22 +1,22 @@
 package parse
 
-import "main/ast"
-import "main/lexer"
+import "main/compiler/ast"
+import "main/compiler/lexer"
 
 // block ::= {stat} [retstat]
-func parseBlock(lexer *Lexer) *Block {
-	return &Block{
+func parseBlock(lexer *lexer.Lexer) *ast.Block {
+	return &ast.Block{
 		Stats:    parseStats(lexer),
 		RetExps:  parseRetExps(lexer),
 		LastLine: lexer.Line(),
 	}
 }
 
-func parseStats(lexer *Lexer) []Stat {
-	stats := make([]Stat, 0, 8)
+func parseStats(lexer *lexer.Lexer) []ast.Stat {
+	stats := make([]ast.Stat, 0, 8)
 	for !_isReturnOrBlockEnd(lexer.LookAhead()) {
 		stat := parseStat(lexer)
-		if _, ok := stat.(*EmptyStat); !ok {
+		if _, ok := stat.(*ast.EmptyStat); !ok {
 			stats = append(stats, stat)
 		}
 	}
@@ -25,8 +25,8 @@ func parseStats(lexer *Lexer) []Stat {
 
 func _isReturnOrBlockEnd(tokenKind int) bool {
 	switch tokenKind {
-	case TOKEN_KW_RETURN, TOKEN_EOF, TOKEN_KW_END,
-		TOKEN_KW_ELSE, TOKEN_KW_ELSEIF, TOKEN_KW_UNTIL:
+	case lexer.TOKEN_KW_RETURN, lexer.TOKEN_EOF, lexer.TOKEN_KW_END,
+	lexer.TOKEN_KW_ELSE, lexer.TOKEN_KW_ELSEIF, lexer.TOKEN_KW_UNTIL:
 		return true
 	}
 	return false
@@ -34,23 +34,23 @@ func _isReturnOrBlockEnd(tokenKind int) bool {
 
 // retstat ::= return [explist] [‘;’]
 // explist ::= exp {‘,’ exp}
-func parseRetExps(lexer *Lexer) []Exp {
-	if lexer.LookAhead() != TOKEN_KW_RETURN {
+func parseRetExps(lex *lexer.Lexer) []ast.Exp {
+	if lex.LookAhead() != lexer.TOKEN_KW_RETURN {
 		return nil
 	}
 
-	lexer.NextToken()
-	switch lexer.LookAhead() {
-	case TOKEN_EOF, TOKEN_KW_END,
-		TOKEN_KW_ELSE, TOKEN_KW_ELSEIF, TOKEN_KW_UNTIL:
-		return []Exp{}
-	case TOKEN_SEP_SEMI:
-		lexer.NextToken()
-		return []Exp{}
+	lex.NextToken()
+	switch lex.LookAhead() {
+	case lexer.TOKEN_EOF, lexer.TOKEN_KW_END,
+	lexer.TOKEN_KW_ELSE, lexer.TOKEN_KW_ELSEIF, lexer.TOKEN_KW_UNTIL:
+		return []ast.Exp{}
+	case lexer.TOKEN_SEP_SEMI:
+		lex.NextToken()
+		return []ast.Exp{}
 	default:
-		exps := parseExpList(lexer)
-		if lexer.LookAhead() == TOKEN_SEP_SEMI {
-			lexer.NextToken()
+		exps := parseExpList(lex)
+		if lex.LookAhead() == lexer.TOKEN_SEP_SEMI {
+			lex.NextToken()
 		}
 		return exps
 	}

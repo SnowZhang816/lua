@@ -1,9 +1,9 @@
-package parser
+package parse
 
-import . "luago/compiler/ast"
-import . "luago/compiler/lexer"
+import "main/compiler/ast"
+import "main/compiler/lexer"
 
-var _statEmpty = &EmptyStat{}
+var _statEmpty = &ast.EmptyStat{}
 
 /*
 stat ::=  ‘;’
@@ -22,171 +22,171 @@ stat ::=  ‘;’
 	| varlist ‘=’ explist
 	| functioncall
 */
-func parseStat(lexer *Lexer) Stat {
-	switch lexer.LookAhead() {
-	case TOKEN_SEP_SEMI:
-		return parseEmptyStat(lexer)
-	case TOKEN_KW_BREAK:
-		return parseBreakStat(lexer)
-	case TOKEN_SEP_LABEL:
-		return parseLabelStat(lexer)
-	case TOKEN_KW_GOTO:
-		return parseGotoStat(lexer)
-	case TOKEN_KW_DO:
-		return parseDoStat(lexer)
-	case TOKEN_KW_WHILE:
-		return parseWhileStat(lexer)
-	case TOKEN_KW_REPEAT:
-		return parseRepeatStat(lexer)
-	case TOKEN_KW_IF:
-		return parseIfStat(lexer)
-	case TOKEN_KW_FOR:
-		return parseForStat(lexer)
-	case TOKEN_KW_FUNCTION:
-		return parseFuncDefStat(lexer)
-	case TOKEN_KW_LOCAL:
-		return parseLocalAssignOrFuncDefStat(lexer)
+func parseStat(lex *lexer.Lexer) ast.Stat {
+	switch lex.LookAhead() {
+	case lexer.TOKEN_SEP_SEMI:
+		return parseEmptyStat(lex)
+	case lexer.TOKEN_KW_BREAK:
+		return parseBreakStat(lex)
+	case lexer.TOKEN_SEP_LABEL:
+		return parseLabelStat(lex)
+	case lexer.TOKEN_KW_GOTO:
+		return parseGotoStat(lex)
+	case lexer.TOKEN_KW_DO:
+		return parseDoStat(lex)
+	case lexer.TOKEN_KW_WHILE:
+		return parseWhileStat(lex)
+	case lexer.TOKEN_KW_REPEAT:
+		return parseRepeatStat(lex)
+	case lexer.TOKEN_KW_IF:
+		return parseIfStat(lex)
+	case lexer.TOKEN_KW_FOR:
+		return parseForStat(lex)
+	case lexer.TOKEN_KW_FUNCTION:
+		return parseFuncDefStat(lex)
+	case lexer.TOKEN_KW_LOCAL:
+		return parseLocalAssignOrFuncDefStat(lex)
 	default:
-		return parseAssignOrFuncCallStat(lexer)
+		return parseAssignOrFuncCallStat(lex)
 	}
 }
 
 // ;
-func parseEmptyStat(lexer *Lexer) *EmptyStat {
-	lexer.NextTokenOfKind(TOKEN_SEP_SEMI)
+func parseEmptyStat(lex *lexer.Lexer) *ast.EmptyStat {
+	lex.NextTokenOfKind(lexer.TOKEN_SEP_SEMI)
 	return _statEmpty
 }
 
 // break
-func parseBreakStat(lexer *Lexer) *BreakStat {
-	lexer.NextTokenOfKind(TOKEN_KW_BREAK)
-	return &BreakStat{lexer.Line()}
+func parseBreakStat(lex *lexer.Lexer) *ast.BreakStat {
+	lex.NextTokenOfKind(lexer.TOKEN_KW_BREAK)
+	return &ast.BreakStat{lex.Line()}
 }
 
 // ‘::’ Name ‘::’
-func parseLabelStat(lexer *Lexer) *LabelStat {
-	lexer.NextTokenOfKind(TOKEN_SEP_LABEL) // ::
-	_, name := lexer.NextIdentifier()      // name
-	lexer.NextTokenOfKind(TOKEN_SEP_LABEL) // ::
-	return &LabelStat{name}
+func parseLabelStat(lex *lexer.Lexer) *ast.LabelStat {
+	lex.NextTokenOfKind(lexer.TOKEN_SEP_LABEL) // ::
+	_, name := lex.NextIdentifier()      // name
+	lex.NextTokenOfKind(lexer.TOKEN_SEP_LABEL) // ::
+	return &ast.LabelStat{name}
 }
 
 // goto Name
-func parseGotoStat(lexer *Lexer) *GotoStat {
-	lexer.NextTokenOfKind(TOKEN_KW_GOTO) // goto
-	_, name := lexer.NextIdentifier()    // name
-	return &GotoStat{name}
+func parseGotoStat(lex *lexer.Lexer) *ast.GotoStat {
+	lex.NextTokenOfKind(lexer.TOKEN_KW_GOTO) // goto
+	_, name := lex.NextIdentifier()    // name
+	return &ast.GotoStat{name}
 }
 
 // do block end
-func parseDoStat(lexer *Lexer) *DoStat {
-	lexer.NextTokenOfKind(TOKEN_KW_DO)  // do
-	block := parseBlock(lexer)          // block
-	lexer.NextTokenOfKind(TOKEN_KW_END) // end
-	return &DoStat{block}
+func parseDoStat(lex *lexer.Lexer) *ast.DoStat {
+	lex.NextTokenOfKind(lexer.TOKEN_KW_DO)  // do
+	block := parseBlock(lex)          // block
+	lex.NextTokenOfKind(lexer.TOKEN_KW_END) // end
+	return &ast.DoStat{block}
 }
 
 // while exp do block end
-func parseWhileStat(lexer *Lexer) *WhileStat {
-	lexer.NextTokenOfKind(TOKEN_KW_WHILE) // while
-	exp := parseExp(lexer)                // exp
-	lexer.NextTokenOfKind(TOKEN_KW_DO)    // do
-	block := parseBlock(lexer)            // block
-	lexer.NextTokenOfKind(TOKEN_KW_END)   // end
-	return &WhileStat{exp, block}
+func parseWhileStat(lex *lexer.Lexer) *ast.WhileStat {
+	lex.NextTokenOfKind(lexer.TOKEN_KW_WHILE) // while
+	exp := parseExp(lex)                // exp
+	lex.NextTokenOfKind(lexer.TOKEN_KW_DO)    // do
+	block := parseBlock(lex)            // block
+	lex.NextTokenOfKind(lexer.TOKEN_KW_END)   // end
+	return &ast.WhileStat{exp, block}
 }
 
 // repeat block until exp
-func parseRepeatStat(lexer *Lexer) *RepeatStat {
-	lexer.NextTokenOfKind(TOKEN_KW_REPEAT) // repeat
-	block := parseBlock(lexer)             // block
-	lexer.NextTokenOfKind(TOKEN_KW_UNTIL)  // until
-	exp := parseExp(lexer)                 // exp
-	return &RepeatStat{block, exp}
+func parseRepeatStat(lex *lexer.Lexer) *ast.RepeatStat {
+	lex.NextTokenOfKind(lexer.TOKEN_KW_REPEAT) // repeat
+	block := parseBlock(lex)             // block
+	lex.NextTokenOfKind(lexer.TOKEN_KW_UNTIL)  // until
+	exp := parseExp(lex)                 // exp
+	return &ast.RepeatStat{block, exp}
 }
 
 // if exp then block {elseif exp then block} [else block] end
-func parseIfStat(lexer *Lexer) *IfStat {
-	exps := make([]Exp, 0, 4)
-	blocks := make([]*Block, 0, 4)
+func parseIfStat(lex *lexer.Lexer) *ast.IfStat {
+	exps := make([]ast.Exp, 0, 4)
+	blocks := make([]*ast.Block, 0, 4)
 
-	lexer.NextTokenOfKind(TOKEN_KW_IF)         // if
-	exps = append(exps, parseExp(lexer))       // exp
-	lexer.NextTokenOfKind(TOKEN_KW_THEN)       // then
-	blocks = append(blocks, parseBlock(lexer)) // block
+	lex.NextTokenOfKind(lexer.TOKEN_KW_IF)         // if
+	exps = append(exps, parseExp(lex))       // exp
+	lex.NextTokenOfKind(lexer.TOKEN_KW_THEN)       // then
+	blocks = append(blocks, parseBlock(lex)) // block
 
-	for lexer.LookAhead() == TOKEN_KW_ELSEIF {
-		lexer.NextToken()                          // elseif
-		exps = append(exps, parseExp(lexer))       // exp
-		lexer.NextTokenOfKind(TOKEN_KW_THEN)       // then
-		blocks = append(blocks, parseBlock(lexer)) // block
+	for lex.LookAhead() == lexer.TOKEN_KW_ELSEIF {
+		lex.NextToken()                          // elseif
+		exps = append(exps, parseExp(lex))       // exp
+		lex.NextTokenOfKind(lexer.TOKEN_KW_THEN)       // then
+		blocks = append(blocks, parseBlock(lex)) // block
 	}
 
 	// else block => elseif true then block
-	if lexer.LookAhead() == TOKEN_KW_ELSE {
-		lexer.NextToken()                           // else
-		exps = append(exps, &TrueExp{lexer.Line()}) //
-		blocks = append(blocks, parseBlock(lexer))  // block
+	if lex.LookAhead() == lexer.TOKEN_KW_ELSE {
+		lex.NextToken()                           // else
+		exps = append(exps, &ast.TrueExp{lex.Line()}) //
+		blocks = append(blocks, parseBlock(lex))  // block
 	}
 
-	lexer.NextTokenOfKind(TOKEN_KW_END) // end
-	return &IfStat{exps, blocks}
+	lex.NextTokenOfKind(lexer.TOKEN_KW_END) // end
+	return &ast.IfStat{exps, blocks}
 }
 
 // for Name ‘=’ exp ‘,’ exp [‘,’ exp] do block end
 // for namelist in explist do block end
-func parseForStat(lexer *Lexer) Stat {
-	lineOfFor, _ := lexer.NextTokenOfKind(TOKEN_KW_FOR)
-	_, name := lexer.NextIdentifier()
-	if lexer.LookAhead() == TOKEN_OP_ASSIGN {
-		return _finishForNumStat(lexer, lineOfFor, name)
+func parseForStat(lex *lexer.Lexer) ast.Stat {
+	lineOfFor, _ := lex.NextTokenOfKind(lexer.TOKEN_KW_FOR)
+	_, name := lex.NextIdentifier()
+	if lex.LookAhead() == lexer.TOKEN_OP_ASSIGN {
+		return _finishForNumStat(lex, lineOfFor, name)
 	} else {
-		return _finishForInStat(lexer, name)
+		return _finishForInStat(lex, name)
 	}
 }
 
 // for Name ‘=’ exp ‘,’ exp [‘,’ exp] do block end
-func _finishForNumStat(lexer *Lexer, lineOfFor int, varName string) *ForNumStat {
-	lexer.NextTokenOfKind(TOKEN_OP_ASSIGN) // for name =
-	initExp := parseExp(lexer)             // exp
-	lexer.NextTokenOfKind(TOKEN_SEP_COMMA) // ,
-	limitExp := parseExp(lexer)            // exp
+func _finishForNumStat(lex *lexer.Lexer, lineOfFor int, varName string) *ast.ForNumStat {
+	lex.NextTokenOfKind(lexer.TOKEN_OP_ASSIGN) // for name =
+	initExp := parseExp(lex)             // exp
+	lex.NextTokenOfKind(lexer.TOKEN_SEP_COMMA) // ,
+	limitExp := parseExp(lex)            // exp
 
-	var stepExp Exp
-	if lexer.LookAhead() == TOKEN_SEP_COMMA {
-		lexer.NextToken()         // ,
-		stepExp = parseExp(lexer) // exp
+	var stepExp ast.Exp
+	if lex.LookAhead() == lexer.TOKEN_SEP_COMMA {
+		lex.NextToken()         // ,
+		stepExp = parseExp(lex) // exp
 	} else {
-		stepExp = &IntegerExp{lexer.Line(), 1}
+		stepExp = &ast.IntegerExp{lex.Line(), 1}
 	}
 
-	lineOfDo, _ := lexer.NextTokenOfKind(TOKEN_KW_DO) // do
-	block := parseBlock(lexer)                        // block
-	lexer.NextTokenOfKind(TOKEN_KW_END)               // end
+	lineOfDo, _ := lex.NextTokenOfKind(lexer.TOKEN_KW_DO) // do
+	block := parseBlock(lex)                        // block
+	lex.NextTokenOfKind(lexer.TOKEN_KW_END)               // end
 
-	return &ForNumStat{lineOfFor, lineOfDo,
+	return &ast.ForNumStat{lineOfFor, lineOfDo,
 		varName, initExp, limitExp, stepExp, block}
 }
 
 // for namelist in explist do block end
 // namelist ::= Name {‘,’ Name}
 // explist ::= exp {‘,’ exp}
-func _finishForInStat(lexer *Lexer, name0 string) *ForInStat {
-	nameList := _finishNameList(lexer, name0)         // for namelist
-	lexer.NextTokenOfKind(TOKEN_KW_IN)                // in
-	expList := parseExpList(lexer)                    // explist
-	lineOfDo, _ := lexer.NextTokenOfKind(TOKEN_KW_DO) // do
-	block := parseBlock(lexer)                        // block
-	lexer.NextTokenOfKind(TOKEN_KW_END)               // end
-	return &ForInStat{lineOfDo, nameList, expList, block}
+func _finishForInStat(lex *lexer.Lexer, name0 string) *ast.ForInStat {
+	nameList := _finishNameList(lex, name0)         // for namelist
+	lex.NextTokenOfKind(lexer.TOKEN_KW_IN)                // in
+	expList := parseExpList(lex)                    // explist
+	lineOfDo, _ := lex.NextTokenOfKind(lexer.TOKEN_KW_DO) // do
+	block := parseBlock(lex)                        // block
+	lex.NextTokenOfKind(lexer.TOKEN_KW_END)               // end
+	return &ast.ForInStat{lineOfDo, nameList, expList, block}
 }
 
 // namelist ::= Name {‘,’ Name}
-func _finishNameList(lexer *Lexer, name0 string) []string {
+func _finishNameList(lex *lexer.Lexer, name0 string) []string {
 	names := []string{name0}
-	for lexer.LookAhead() == TOKEN_SEP_COMMA {
-		lexer.NextToken()                 // ,
-		_, name := lexer.NextIdentifier() // Name
+	for lex.LookAhead() == lexer.TOKEN_SEP_COMMA {
+		lex.NextToken()                 // ,
+		_, name := lex.NextIdentifier() // Name
 		names = append(names, name)
 	}
 	return names
@@ -194,12 +194,12 @@ func _finishNameList(lexer *Lexer, name0 string) []string {
 
 // local function Name funcbody
 // local namelist [‘=’ explist]
-func parseLocalAssignOrFuncDefStat(lexer *Lexer) Stat {
-	lexer.NextTokenOfKind(TOKEN_KW_LOCAL)
-	if lexer.LookAhead() == TOKEN_KW_FUNCTION {
-		return _finishLocalFuncDefStat(lexer)
+func parseLocalAssignOrFuncDefStat(lex *lexer.Lexer) ast.Stat {
+	lex.NextTokenOfKind(lexer.TOKEN_KW_LOCAL)
+	if lex.LookAhead() == lexer.TOKEN_KW_FUNCTION {
+		return _finishLocalFuncDefStat(lex)
 	} else {
-		return _finishLocalVarDeclStat(lexer)
+		return _finishLocalVarDeclStat(lex)
 	}
 }
 
@@ -218,64 +218,64 @@ not to `local f = function () body end`
  contains references to f.)
 */
 // local function Name funcbody
-func _finishLocalFuncDefStat(lexer *Lexer) *LocalFuncDefStat {
-	lexer.NextTokenOfKind(TOKEN_KW_FUNCTION) // local function
-	_, name := lexer.NextIdentifier()        // name
-	fdExp := parseFuncDefExp(lexer)          // funcbody
-	return &LocalFuncDefStat{name, fdExp}
+func _finishLocalFuncDefStat(lex *lexer.Lexer) *ast.LocalFuncDefStat {
+	lex.NextTokenOfKind(lexer.TOKEN_KW_FUNCTION) // local function
+	_, name := lex.NextIdentifier()        // name
+	fdExp := parseFuncDefExp(lex)          // funcbody
+	return &ast.LocalFuncDefStat{name, fdExp}
 }
 
 // local namelist [‘=’ explist]
-func _finishLocalVarDeclStat(lexer *Lexer) *LocalVarDeclStat {
-	_, name0 := lexer.NextIdentifier()        // local Name
-	nameList := _finishNameList(lexer, name0) // { , Name }
-	var expList []Exp = nil
-	if lexer.LookAhead() == TOKEN_OP_ASSIGN {
-		lexer.NextToken()             // ==
-		expList = parseExpList(lexer) // explist
+func _finishLocalVarDeclStat(lex *lexer.Lexer) *ast.LocalVarDeclStat {
+	_, name0 := lex.NextIdentifier()        // local Name
+	nameList := _finishNameList(lex, name0) // { , Name }
+	var expList []ast.Exp = nil
+	if lex.LookAhead() == lexer.TOKEN_OP_ASSIGN {
+		lex.NextToken()             // ==
+		expList = parseExpList(lex) // explist
 	}
-	lastLine := lexer.Line()
-	return &LocalVarDeclStat{lastLine, nameList, expList}
+	lastLine := lex.Line()
+	return &ast.LocalVarDeclStat{lastLine, nameList, expList}
 }
 
 // varlist ‘=’ explist
 // functioncall
-func parseAssignOrFuncCallStat(lexer *Lexer) Stat {
-	prefixExp := parsePrefixExp(lexer)
-	if fc, ok := prefixExp.(*FuncCallExp); ok {
+func parseAssignOrFuncCallStat(lex *lexer.Lexer) ast.Stat {
+	prefixExp := parsePrefixExp(lex)
+	if fc, ok := prefixExp.(*ast.FuncCallExp); ok {
 		return fc
 	} else {
-		return parseAssignStat(lexer, prefixExp)
+		return parseAssignStat(lex, prefixExp)
 	}
 }
 
 // varlist ‘=’ explist |
-func parseAssignStat(lexer *Lexer, var0 Exp) *AssignStat {
-	varList := _finishVarList(lexer, var0) // varlist
-	lexer.NextTokenOfKind(TOKEN_OP_ASSIGN) // =
-	expList := parseExpList(lexer)         // explist
-	lastLine := lexer.Line()
-	return &AssignStat{lastLine, varList, expList}
+func parseAssignStat(lex *lexer.Lexer, var0 ast.Exp) *ast.AssignStat {
+	varList := _finishVarList(lex, var0) // varlist
+	lex.NextTokenOfKind(lexer.TOKEN_OP_ASSIGN) // =
+	expList := parseExpList(lex)         // explist
+	lastLine := lex.Line()
+	return &ast.AssignStat{lastLine, varList, expList}
 }
 
 // varlist ::= var {‘,’ var}
-func _finishVarList(lexer *Lexer, var0 Exp) []Exp {
-	vars := []Exp{_checkVar(lexer, var0)}      // var
-	for lexer.LookAhead() == TOKEN_SEP_COMMA { // {
-		lexer.NextToken()                          // ,
-		exp := parsePrefixExp(lexer)               // var
-		vars = append(vars, _checkVar(lexer, exp)) //
+func _finishVarList(lex *lexer.Lexer, var0 ast.Exp) []ast.Exp {
+	vars := []ast.Exp{_checkVar(lex, var0)}      // var
+	for lex.LookAhead() == lexer.TOKEN_SEP_COMMA { // {
+		lex.NextToken()                          // ,
+		exp := parsePrefixExp(lex)               // var
+		vars = append(vars, _checkVar(lex, exp)) //
 	} // }
 	return vars
 }
 
 // var ::=  Name | prefixexp ‘[’ exp ‘]’ | prefixexp ‘.’ Name
-func _checkVar(lexer *Lexer, exp Exp) Exp {
+func _checkVar(lex *lexer.Lexer, exp ast.Exp) ast.Exp {
 	switch exp.(type) {
-	case *NameExp, *TableAccessExp:
+	case *ast.NameExp, *ast.TableAccessExp:
 		return exp
 	}
-	lexer.NextTokenOfKind(-1) // trigger error
+	lex.NextTokenOfKind(-1) // trigger error
 	panic("unreachable!")
 }
 
@@ -284,39 +284,39 @@ func _checkVar(lexer *Lexer, exp Exp) Exp {
 // funcbody ::= ‘(’ [parlist] ‘)’ block end
 // parlist ::= namelist [‘,’ ‘...’] | ‘...’
 // namelist ::= Name {‘,’ Name}
-func parseFuncDefStat(lexer *Lexer) *AssignStat {
-	lexer.NextTokenOfKind(TOKEN_KW_FUNCTION) // function
-	fnExp, hasColon := _parseFuncName(lexer) // funcname
-	fdExp := parseFuncDefExp(lexer)          // funcbody
+func parseFuncDefStat(lex *lexer.Lexer) *ast.AssignStat {
+	lex.NextTokenOfKind(lexer.TOKEN_KW_FUNCTION) // function
+	fnExp, hasColon := _parseFuncName(lex) // funcname
+	fdExp := parseFuncDefExp(lex)          // funcbody
 	if hasColon {                            // insert self
 		fdExp.ParList = append(fdExp.ParList, "")
 		copy(fdExp.ParList[1:], fdExp.ParList)
 		fdExp.ParList[0] = "self"
 	}
 
-	return &AssignStat{
+	return &ast.AssignStat{
 		LastLine: fdExp.Line,
-		VarList:  []Exp{fnExp},
-		ExpList:  []Exp{fdExp},
+		VarList:  []ast.Exp{fnExp},
+		ExpList:  []ast.Exp{fdExp},
 	}
 }
 
 // funcname ::= Name {‘.’ Name} [‘:’ Name]
-func _parseFuncName(lexer *Lexer) (exp Exp, hasColon bool) {
-	line, name := lexer.NextIdentifier()
-	exp = &NameExp{line, name}
+func _parseFuncName(lex *lexer.Lexer) (exp ast.Exp, hasColon bool) {
+	line, name := lex.NextIdentifier()
+	exp = &ast.NameExp{line, name}
 
-	for lexer.LookAhead() == TOKEN_SEP_DOT {
-		lexer.NextToken()
-		line, name := lexer.NextIdentifier()
-		idx := &StringExp{line, name}
-		exp = &TableAccessExp{line, exp, idx}
+	for lex.LookAhead() == lexer.TOKEN_SEP_DOT {
+		lex.NextToken()
+		line, name := lex.NextIdentifier()
+		idx := &ast.StringExp{line, name}
+		exp = &ast.TableAccessExp{line, exp, idx}
 	}
-	if lexer.LookAhead() == TOKEN_SEP_COLON {
-		lexer.NextToken()
-		line, name := lexer.NextIdentifier()
-		idx := &StringExp{line, name}
-		exp = &TableAccessExp{line, exp, idx}
+	if lex.LookAhead() == lexer.TOKEN_SEP_COLON {
+		lex.NextToken()
+		line, name := lex.NextIdentifier()
+		idx := &ast.StringExp{line, name}
+		exp = &ast.TableAccessExp{line, exp, idx}
 		hasColon = true
 	}
 

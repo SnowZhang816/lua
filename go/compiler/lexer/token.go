@@ -2,6 +2,7 @@ package lexer
 
 const (
 	TOKEN_EOF         = iota           // end-of-file
+	//运算符or分隔符
 	TOKEN_VARARG                       // ...
 	TOKEN_SEP_SEMI                     // ;
 	TOKEN_SEP_COMMA                    // ,
@@ -35,6 +36,8 @@ const (
 	TOKEN_OP_EQ                        // ==
 	TOKEN_OP_NE                        // ~=
 	TOKEN_OP_LEN                       // #
+
+	//关键字
 	TOKEN_OP_AND                       // and
 	TOKEN_OP_OR                        // or
 	TOKEN_OP_NOT                       // not
@@ -57,9 +60,15 @@ const (
 	TOKEN_KW_TRUE                      // true
 	TOKEN_KW_UNTIL                     // until
 	TOKEN_KW_WHILE                     // while
+
+	//标识符
 	TOKEN_IDENTIFIER                   // identifier
+
+	//字面量
 	TOKEN_NUMBER                       // number literal
 	TOKEN_STRING                       // string literal
+
+	
 	TOKEN_OP_UNM      = TOKEN_OP_MINUS // unary minus
 	TOKEN_OP_SUB      = TOKEN_OP_MINUS
 	TOKEN_OP_BNOT     = TOKEN_OP_WAVE

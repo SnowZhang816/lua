@@ -1,7 +1,7 @@
-package parser
+package parse
 
-import "main/ast"
-import "main/lexer"
+import "main/compiler/ast"
+import "main/compiler/lexer"
 
 // prefixexp ::= var | functioncall | ‘(’ exp ‘)’
 // var ::=  Name | prefixexp ‘[’ exp ‘]’ | prefixexp ‘.’ Name
@@ -14,47 +14,47 @@ prefixexp ::= Name
 	| prefixexp ‘.’ Name
 	| prefixexp [‘:’ Name] args
 */
-func parsePrefixExp(lexer *Lexer) Exp {
-	var exp Exp
-	if lexer.LookAhead() == TOKEN_IDENTIFIER {
-		line, name := lexer.NextIdentifier() // Name
-		exp = &NameExp{line, name}
+func parsePrefixExp(lex *lexer.Lexer) ast.Exp {
+	var exp ast.Exp
+	if lex.LookAhead() == lexer.TOKEN_IDENTIFIER {
+		line, name := lex.NextIdentifier() // Name
+		exp = &ast.NameExp{line, name}
 	} else { // ‘(’ exp ‘)’
-		exp = parseParensExp(lexer)
+		exp = parseParensExp(lex)
 	}
-	return _finishPrefixExp(lexer, exp)
+	return _finishPrefixExp(lex, exp)
 }
 
-func parseParensExp(lexer *Lexer) Exp {
-	lexer.NextTokenOfKind(TOKEN_SEP_LPAREN) // (
-	exp := parseExp(lexer)                  // exp
-	lexer.NextTokenOfKind(TOKEN_SEP_RPAREN) // )
+func parseParensExp(lex *lexer.Lexer) ast.Exp {
+	lex.NextTokenOfKind(lexer.TOKEN_SEP_LPAREN) // (
+	exp := parseExp(lex)                  // exp
+	lex.NextTokenOfKind(lexer.TOKEN_SEP_RPAREN) // )
 
 	switch exp.(type) {
-	case *VarargExp, *FuncCallExp, *NameExp, *TableAccessExp:
-		return &ParensExp{exp}
+	case *ast.VarargExp, *ast.FuncCallExp, *ast.NameExp, *ast.TableAccessExp:
+		return &ast.ParensExp{exp}
 	}
 
 	// no need to keep parens
 	return exp
 }
 
-func _finishPrefixExp(lexer *Lexer, exp Exp) Exp {
+func _finishPrefixExp(lex *lexer.Lexer, exp ast.Exp) ast.Exp {
 	for {
-		switch lexer.LookAhead() {
-		case TOKEN_SEP_LBRACK: // prefixexp ‘[’ exp ‘]’
-			lexer.NextToken()                       // ‘[’
-			keyExp := parseExp(lexer)               // exp
-			lexer.NextTokenOfKind(TOKEN_SEP_RBRACK) // ‘]’
-			exp = &TableAccessExp{lexer.Line(), exp, keyExp}
-		case TOKEN_SEP_DOT: // prefixexp ‘.’ Name
-			lexer.NextToken()                    // ‘.’
-			line, name := lexer.NextIdentifier() // Name
-			keyExp := &StringExp{line, name}
-			exp = &TableAccessExp{line, exp, keyExp}
-		case TOKEN_SEP_COLON, // prefixexp ‘:’ Name args
-			TOKEN_SEP_LPAREN, TOKEN_SEP_LCURLY, TOKEN_STRING: // prefixexp args
-			exp = _finishFuncCallExp(lexer, exp)
+		switch lex.LookAhead() {
+		case lexer.TOKEN_SEP_LBRACK: // prefixexp ‘[’ exp ‘]’
+			lex.NextToken()                       // ‘[’
+			keyExp := parseExp(lex)               // exp
+			lex.NextTokenOfKind(lexer.TOKEN_SEP_RBRACK) // ‘]’
+			exp = &ast.TableAccessExp{lex.Line(), exp, keyExp}
+		case lexer.TOKEN_SEP_DOT: // prefixexp ‘.’ Name
+			lex.NextToken()                    // ‘.’
+			line, name := lex.NextIdentifier() // Name
+			keyExp := &ast.StringExp{line, name}
+			exp = &ast.TableAccessExp{line, exp, keyExp}
+		case lexer.TOKEN_SEP_COLON, // prefixexp ‘:’ Name args
+		lexer.TOKEN_SEP_LPAREN, lexer.TOKEN_SEP_LCURLY, lexer.TOKEN_STRING: // prefixexp args
+			exp = _finishFuncCallExp(lex, exp)
 		default:
 			return exp
 		}
@@ -63,37 +63,37 @@ func _finishPrefixExp(lexer *Lexer, exp Exp) Exp {
 }
 
 // functioncall ::=  prefixexp args | prefixexp ‘:’ Name args
-func _finishFuncCallExp(lexer *Lexer, prefixExp Exp) *FuncCallExp {
-	nameExp := _parseNameExp(lexer)
-	line := lexer.Line() // todo
-	args := _parseArgs(lexer)
-	lastLine := lexer.Line()
-	return &FuncCallExp{line, lastLine, prefixExp, nameExp, args}
+func _finishFuncCallExp(lex *lexer.Lexer, prefixExp ast.Exp) *ast.FuncCallExp {
+	nameExp := _parseNameExp(lex)
+	line := lex.Line() // todo
+	args := _parseArgs(lex)
+	lastLine := lex.Line()
+	return &ast.FuncCallExp{line, lastLine, prefixExp, nameExp, args}
 }
 
-func _parseNameExp(lexer *Lexer) *StringExp {
-	if lexer.LookAhead() == TOKEN_SEP_COLON {
-		lexer.NextToken()
-		line, name := lexer.NextIdentifier()
-		return &StringExp{line, name}
+func _parseNameExp(lex *lexer.Lexer) *ast.StringExp {
+	if lex.LookAhead() == lexer.TOKEN_SEP_COLON {
+		lex.NextToken()
+		line, name := lex.NextIdentifier()
+		return &ast.StringExp{line, name}
 	}
 	return nil
 }
 
 // args ::=  ‘(’ [explist] ‘)’ | tableconstructor | LiteralString
-func _parseArgs(lexer *Lexer) (args []Exp) {
-	switch lexer.LookAhead() {
-	case TOKEN_SEP_LPAREN: // ‘(’ [explist] ‘)’
-		lexer.NextToken() // TOKEN_SEP_LPAREN
-		if lexer.LookAhead() != TOKEN_SEP_RPAREN {
-			args = parseExpList(lexer)
+func _parseArgs(lex *lexer.Lexer) (args []ast.Exp) {
+	switch lex.LookAhead() {
+	case lexer.TOKEN_SEP_LPAREN: // ‘(’ [explist] ‘)’
+		lex.NextToken() // TOKEN_SEP_LPAREN
+		if lex.LookAhead() != lexer.TOKEN_SEP_RPAREN {
+			args = parseExpList(lex)
 		}
-		lexer.NextTokenOfKind(TOKEN_SEP_RPAREN)
-	case TOKEN_SEP_LCURLY: // ‘{’ [fieldlist] ‘}’
-		args = []Exp{parseTableConstructorExp(lexer)}
+		lex.NextTokenOfKind(lexer.TOKEN_SEP_RPAREN)
+	case lexer.TOKEN_SEP_LCURLY: // ‘{’ [fieldlist] ‘}’
+		args = []ast.Exp{parseTableConstructorExp(lex)}
 	default: // LiteralString
-		line, str := lexer.NextTokenOfKind(TOKEN_STRING)
-		args = []Exp{&StringExp{line, str}}
+		line, str := lex.NextTokenOfKind(lexer.TOKEN_STRING)
+		args = []ast.Exp{&ast.StringExp{line, str}}
 	}
 	return
 }

@@ -6,9 +6,16 @@ import "main/vm"
 import "main/api"
 import "main/cLog"
 import "fmt"
+import "main/compiler"
 
 func (self *luaState) Load(chunk []byte, chunkName, mode string) int {
-	proto := binChunk.UnDump(chunk)
+	var proto *binChunk.Prototype
+	if binChunk.IsBinaryChunk(chunk) {
+		proto = binChunk.UnDump(chunk)
+	} else {
+		proto = compiler.Compile(chunk)
+	}
+
 	aUtil.PrintProto(proto)
 
 	cLog.Println("\n\n\n luaState Load")

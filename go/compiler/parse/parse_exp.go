@@ -1,16 +1,16 @@
-package parser
+package parse
 
-import "main/ast"
-import "main/lexer"
+import "main/compiler/ast"
+import "main/compiler/lexer"
 import "main/number"
 
 // explist ::= exp {‘,’ exp}
-func parseExpList(lexer *Lexer) []Exp {
-	exps := make([]Exp, 0, 4)
-	exps = append(exps, parseExp(lexer))
-	for lexer.LookAhead() == TOKEN_SEP_COMMA {
-		lexer.NextToken()
-		exps = append(exps, parseExp(lexer))
+func parseExpList(lex *lexer.Lexer) []ast.Exp {
+	exps := make([]ast.Exp, 0, 4)
+	exps = append(exps, parseExp(lex))
+	for lex.LookAhead() == lexer.TOKEN_SEP_COMMA {
+		lex.NextToken()
+		exps = append(exps, parseExp(lex))
 	}
 	return exps
 }
@@ -36,41 +36,41 @@ exp1  ::= exp0 {‘^’ exp2}
 exp0  ::= nil | false | true | Numeral | LiteralString
 		| ‘...’ | functiondef | prefixexp | tableconstructor
 */
-func parseExp(lexer *Lexer) Exp {
+func parseExp(lexer *lexer.Lexer) ast.Exp {
 	return parseExp12(lexer)
 }
 
 // x or y
-func parseExp12(lexer *Lexer) Exp {
-	exp := parseExp11(lexer)
-	for lexer.LookAhead() == TOKEN_OP_OR {
-		line, op, _ := lexer.NextToken()
-		lor := &BinopExp{line, op, exp, parseExp11(lexer)}
+func parseExp12(lex *lexer.Lexer) ast.Exp {
+	exp := parseExp11(lex)
+	for lex.LookAhead() == lexer.TOKEN_OP_OR {
+		line, op, _ := lex.NextToken()
+		lor := &ast.BinopExp{line, op, exp, parseExp11(lex)}
 		exp = optimizeLogicalOr(lor)
 	}
 	return exp
 }
 
 // x and y
-func parseExp11(lexer *Lexer) Exp {
-	exp := parseExp10(lexer)
-	for lexer.LookAhead() == TOKEN_OP_AND {
-		line, op, _ := lexer.NextToken()
-		land := &BinopExp{line, op, exp, parseExp10(lexer)}
+func parseExp11(lex *lexer.Lexer) ast.Exp {
+	exp := parseExp10(lex)
+	for lex.LookAhead() == lexer.TOKEN_OP_AND {
+		line, op, _ := lex.NextToken()
+		land := &ast.BinopExp{line, op, exp, parseExp10(lex)}
 		exp = optimizeLogicalAnd(land)
 	}
 	return exp
 }
 
 // compare
-func parseExp10(lexer *Lexer) Exp {
-	exp := parseExp9(lexer)
+func parseExp10(lex *lexer.Lexer) ast.Exp {
+	exp := parseExp9(lex)
 	for {
-		switch lexer.LookAhead() {
-		case TOKEN_OP_LT, TOKEN_OP_GT, TOKEN_OP_NE,
-			TOKEN_OP_LE, TOKEN_OP_GE, TOKEN_OP_EQ:
-			line, op, _ := lexer.NextToken()
-			exp = &BinopExp{line, op, exp, parseExp9(lexer)}
+		switch lex.LookAhead() {
+		case lexer.TOKEN_OP_LT, lexer.TOKEN_OP_GT, lexer.TOKEN_OP_NE,
+		lexer.TOKEN_OP_LE, lexer.TOKEN_OP_GE, lexer.TOKEN_OP_EQ:
+			line, op, _ := lex.NextToken()
+			exp = &ast.BinopExp{line, op, exp, parseExp9(lex)}
 		default:
 			return exp
 		}
@@ -79,46 +79,46 @@ func parseExp10(lexer *Lexer) Exp {
 }
 
 // x | y
-func parseExp9(lexer *Lexer) Exp {
-	exp := parseExp8(lexer)
-	for lexer.LookAhead() == TOKEN_OP_BOR {
-		line, op, _ := lexer.NextToken()
-		bor := &BinopExp{line, op, exp, parseExp8(lexer)}
+func parseExp9(lex *lexer.Lexer) ast.Exp {
+	exp := parseExp8(lex)
+	for lex.LookAhead() == lexer.TOKEN_OP_BOR {
+		line, op, _ := lex.NextToken()
+		bor := &ast.BinopExp{line, op, exp, parseExp8(lex)}
 		exp = optimizeBitwiseBinaryOp(bor)
 	}
 	return exp
 }
 
 // x ~ y
-func parseExp8(lexer *Lexer) Exp {
-	exp := parseExp7(lexer)
-	for lexer.LookAhead() == TOKEN_OP_BXOR {
-		line, op, _ := lexer.NextToken()
-		bxor := &BinopExp{line, op, exp, parseExp7(lexer)}
+func parseExp8(lex *lexer.Lexer) ast.Exp {
+	exp := parseExp7(lex)
+	for lex.LookAhead() == lexer.TOKEN_OP_BXOR {
+		line, op, _ := lex.NextToken()
+		bxor := &ast.BinopExp{line, op, exp, parseExp7(lex)}
 		exp = optimizeBitwiseBinaryOp(bxor)
 	}
 	return exp
 }
 
 // x & y
-func parseExp7(lexer *Lexer) Exp {
-	exp := parseExp6(lexer)
-	for lexer.LookAhead() == TOKEN_OP_BAND {
-		line, op, _ := lexer.NextToken()
-		band := &BinopExp{line, op, exp, parseExp6(lexer)}
+func parseExp7(lex *lexer.Lexer) ast.Exp {
+	exp := parseExp6(lex)
+	for lex.LookAhead() == lexer.TOKEN_OP_BAND {
+		line, op, _ := lex.NextToken()
+		band := &ast.BinopExp{line, op, exp, parseExp6(lex)}
 		exp = optimizeBitwiseBinaryOp(band)
 	}
 	return exp
 }
 
 // shift
-func parseExp6(lexer *Lexer) Exp {
-	exp := parseExp5(lexer)
+func parseExp6(lex *lexer.Lexer) ast.Exp {
+	exp := parseExp5(lex)
 	for {
-		switch lexer.LookAhead() {
-		case TOKEN_OP_SHL, TOKEN_OP_SHR:
-			line, op, _ := lexer.NextToken()
-			shx := &BinopExp{line, op, exp, parseExp5(lexer)}
+		switch lex.LookAhead() {
+		case lexer.TOKEN_OP_SHL, lexer.TOKEN_OP_SHR:
+			line, op, _ := lex.NextToken()
+			shx := &ast.BinopExp{line, op, exp, parseExp5(lex)}
 			exp = optimizeBitwiseBinaryOp(shx)
 		default:
 			return exp
@@ -128,29 +128,29 @@ func parseExp6(lexer *Lexer) Exp {
 }
 
 // a .. b
-func parseExp5(lexer *Lexer) Exp {
-	exp := parseExp4(lexer)
-	if lexer.LookAhead() != TOKEN_OP_CONCAT {
+func parseExp5(lex *lexer.Lexer) ast.Exp {
+	exp := parseExp4(lex)
+	if lex.LookAhead() != lexer.TOKEN_OP_CONCAT {
 		return exp
 	}
 
 	line := 0
-	exps := []Exp{exp}
-	for lexer.LookAhead() == TOKEN_OP_CONCAT {
-		line, _, _ = lexer.NextToken()
-		exps = append(exps, parseExp4(lexer))
+	exps := []ast.Exp{exp}
+	for lex.LookAhead() == lexer.TOKEN_OP_CONCAT {
+		line, _, _ = lex.NextToken()
+		exps = append(exps, parseExp4(lex))
 	}
-	return &ConcatExp{line, exps}
+	return &ast.ConcatExp{line, exps}
 }
 
 // x +/- y
-func parseExp4(lexer *Lexer) Exp {
-	exp := parseExp3(lexer)
+func parseExp4(lex *lexer.Lexer) ast.Exp {
+	exp := parseExp3(lex)
 	for {
-		switch lexer.LookAhead() {
-		case TOKEN_OP_ADD, TOKEN_OP_SUB:
-			line, op, _ := lexer.NextToken()
-			arith := &BinopExp{line, op, exp, parseExp3(lexer)}
+		switch lex.LookAhead() {
+		case lexer.TOKEN_OP_ADD, lexer.TOKEN_OP_SUB:
+			line, op, _ := lex.NextToken()
+			arith := &ast.BinopExp{line, op, exp, parseExp3(lex)}
 			exp = optimizeArithBinaryOp(arith)
 		default:
 			return exp
@@ -160,13 +160,13 @@ func parseExp4(lexer *Lexer) Exp {
 }
 
 // *, %, /, //
-func parseExp3(lexer *Lexer) Exp {
-	exp := parseExp2(lexer)
+func parseExp3(lex *lexer.Lexer) ast.Exp {
+	exp := parseExp2(lex)
 	for {
-		switch lexer.LookAhead() {
-		case TOKEN_OP_MUL, TOKEN_OP_MOD, TOKEN_OP_DIV, TOKEN_OP_IDIV:
-			line, op, _ := lexer.NextToken()
-			arith := &BinopExp{line, op, exp, parseExp2(lexer)}
+		switch lex.LookAhead() {
+		case lexer.TOKEN_OP_MUL, lexer.TOKEN_OP_MOD, lexer.TOKEN_OP_DIV, lexer.TOKEN_OP_IDIV:
+			line, op, _ := lex.NextToken()
+			arith := &ast.BinopExp{line, op, exp, parseExp2(lex)}
 			exp = optimizeArithBinaryOp(arith)
 		default:
 			return exp
@@ -176,61 +176,61 @@ func parseExp3(lexer *Lexer) Exp {
 }
 
 // unary
-func parseExp2(lexer *Lexer) Exp {
-	switch lexer.LookAhead() {
-	case TOKEN_OP_UNM, TOKEN_OP_BNOT, TOKEN_OP_LEN, TOKEN_OP_NOT:
-		line, op, _ := lexer.NextToken()
-		exp := &UnopExp{line, op, parseExp2(lexer)}
+func parseExp2(lex *lexer.Lexer) ast.Exp {
+	switch lex.LookAhead() {
+	case lexer.TOKEN_OP_UNM, lexer.TOKEN_OP_BNOT, lexer.TOKEN_OP_LEN, lexer.TOKEN_OP_NOT:
+		line, op, _ := lex.NextToken()
+		exp := &ast.UnopExp{line, op, parseExp2(lex)}
 		return optimizeUnaryOp(exp)
 	}
-	return parseExp1(lexer)
+	return parseExp1(lex)
 }
 
 // x ^ y
-func parseExp1(lexer *Lexer) Exp { // pow is right associative
-	exp := parseExp0(lexer)
-	if lexer.LookAhead() == TOKEN_OP_POW {
-		line, op, _ := lexer.NextToken()
-		exp = &BinopExp{line, op, exp, parseExp2(lexer)}
+func parseExp1(lex *lexer.Lexer) ast.Exp { // pow is right associative
+	exp := parseExp0(lex)
+	if lex.LookAhead() == lexer.TOKEN_OP_POW {
+		line, op, _ := lex.NextToken()
+		exp = &ast.BinopExp{line, op, exp, parseExp2(lex)}
 	}
 	return optimizePow(exp)
 }
 
-func parseExp0(lexer *Lexer) Exp {
-	switch lexer.LookAhead() {
-	case TOKEN_VARARG: // ...
-		line, _, _ := lexer.NextToken()
-		return &VarargExp{line}
-	case TOKEN_KW_NIL: // nil
-		line, _, _ := lexer.NextToken()
-		return &NilExp{line}
-	case TOKEN_KW_TRUE: // true
-		line, _, _ := lexer.NextToken()
-		return &TrueExp{line}
-	case TOKEN_KW_FALSE: // false
-		line, _, _ := lexer.NextToken()
-		return &FalseExp{line}
-	case TOKEN_STRING: // LiteralString
-		line, _, token := lexer.NextToken()
-		return &StringExp{line, token}
-	case TOKEN_NUMBER: // Numeral
-		return parseNumberExp(lexer)
-	case TOKEN_SEP_LCURLY: // tableconstructor
-		return parseTableConstructorExp(lexer)
-	case TOKEN_KW_FUNCTION: // functiondef
-		lexer.NextToken()
-		return parseFuncDefExp(lexer)
+func parseExp0(lex *lexer.Lexer) ast.Exp {
+	switch lex.LookAhead() {
+	case lexer.TOKEN_VARARG: // ...
+		line, _, _ := lex.NextToken()
+		return &ast.VarargExp{line}
+	case lexer.TOKEN_KW_NIL: // nil
+		line, _, _ := lex.NextToken()
+		return &ast.NilExp{line}
+	case lexer.TOKEN_KW_TRUE: // true
+		line, _, _ := lex.NextToken()
+		return &ast.TrueExp{line}
+	case lexer.TOKEN_KW_FALSE: // false
+		line, _, _ := lex.NextToken()
+		return &ast.FalseExp{line}
+	case lexer.TOKEN_STRING: // LiteralString
+		line, _, token := lex.NextToken()
+		return &ast.StringExp{line, token}
+	case lexer.TOKEN_NUMBER: // Numeral
+		return parseNumberExp(lex)
+	case lexer.TOKEN_SEP_LCURLY: // tableconstructor
+		return parseTableConstructorExp(lex)
+	case lexer.TOKEN_KW_FUNCTION: // functiondef
+		lex.NextToken()
+		return parseFuncDefExp(lex)
 	default: // prefixexp
-		return parsePrefixExp(lexer)
+		return parsePrefixExp(lex)
 	}
 }
 
-func parseNumberExp(lexer *Lexer) Exp {
-	line, _, token := lexer.NextToken()
+func parseNumberExp(lex *lexer.Lexer) ast.Exp {
+	line, _, token := lex.NextToken()
 	if i, ok := number.ParseInteger(token); ok {
-		return &IntegerExp{line, i}
+		return &ast.IntegerExp{line, i}
 	} else if f, ok := number.ParseFloat(token); ok {
-		return &FloatExp{line, f}
+		return &ast.FloatExp{line, f}
 	} else { // todo
 		panic("not a number: " + token)
 	}
@@ -238,36 +238,36 @@ func parseNumberExp(lexer *Lexer) Exp {
 
 // functiondef ::= function funcbody
 // funcbody ::= ‘(’ [parlist] ‘)’ block end
-func parseFuncDefExp(lexer *Lexer) *FuncDefExp {
-	line := lexer.Line()                               // function
-	lexer.NextTokenOfKind(TOKEN_SEP_LPAREN)            // (
-	parList, isVararg := _parseParList(lexer)          // [parlist]
-	lexer.NextTokenOfKind(TOKEN_SEP_RPAREN)            // )
-	block := parseBlock(lexer)                         // block
-	lastLine, _ := lexer.NextTokenOfKind(TOKEN_KW_END) // end
-	return &FuncDefExp{line, lastLine, parList, isVararg, block}
+func parseFuncDefExp(lex *lexer.Lexer) *ast.FuncDefExp {
+	line := lex.Line()                               // function
+	lex.NextTokenOfKind(lexer.TOKEN_SEP_LPAREN)            // (
+	parList, isVararg := _parseParList(lex)          // [parlist]
+	lex.NextTokenOfKind(lexer.TOKEN_SEP_RPAREN)            // )
+	block := parseBlock(lex)                         // block
+	lastLine, _ := lex.NextTokenOfKind(lexer.TOKEN_KW_END) // end
+	return &ast.FuncDefExp{line, lastLine, parList, isVararg, block}
 }
 
 // [parlist]
 // parlist ::= namelist [‘,’ ‘...’] | ‘...’
-func _parseParList(lexer *Lexer) (names []string, isVararg bool) {
-	switch lexer.LookAhead() {
-	case TOKEN_SEP_RPAREN:
+func _parseParList(lex *lexer.Lexer) (names []string, isVararg bool) {
+	switch lex.LookAhead() {
+	case lexer.TOKEN_SEP_RPAREN:
 		return nil, false
-	case TOKEN_VARARG:
-		lexer.NextToken()
+	case lexer.TOKEN_VARARG:
+		lex.NextToken()
 		return nil, true
 	}
 
-	_, name := lexer.NextIdentifier()
+	_, name := lex.NextIdentifier()
 	names = append(names, name)
-	for lexer.LookAhead() == TOKEN_SEP_COMMA {
-		lexer.NextToken()
-		if lexer.LookAhead() == TOKEN_IDENTIFIER {
-			_, name := lexer.NextIdentifier()
+	for lex.LookAhead() == lexer.TOKEN_SEP_COMMA {
+		lex.NextToken()
+		if lex.LookAhead() == lexer.TOKEN_IDENTIFIER {
+			_, name := lex.NextIdentifier()
 			names = append(names, name)
 		} else {
-			lexer.NextTokenOfKind(TOKEN_VARARG)
+			lex.NextTokenOfKind(lexer.TOKEN_VARARG)
 			isVararg = true
 			break
 		}
@@ -276,26 +276,26 @@ func _parseParList(lexer *Lexer) (names []string, isVararg bool) {
 }
 
 // tableconstructor ::= ‘{’ [fieldlist] ‘}’
-func parseTableConstructorExp(lexer *Lexer) *TableConstructorExp {
-	line := lexer.Line()
-	lexer.NextTokenOfKind(TOKEN_SEP_LCURLY)    // {
-	keyExps, valExps := _parseFieldList(lexer) // [fieldlist]
-	lexer.NextTokenOfKind(TOKEN_SEP_RCURLY)    // }
-	lastLine := lexer.Line()
-	return &TableConstructorExp{line, lastLine, keyExps, valExps}
+func parseTableConstructorExp(lex *lexer.Lexer) *ast.TableConstructorExp {
+	line := lex.Line()
+	lex.NextTokenOfKind(lexer.TOKEN_SEP_LCURLY)    // {
+	keyExps, valExps := _parseFieldList(lex) // [fieldlist]
+	lex.NextTokenOfKind(lexer.TOKEN_SEP_RCURLY)    // }
+	lastLine := lex.Line()
+	return &ast.TableConstructorExp{line, lastLine, keyExps, valExps}
 }
 
 // fieldlist ::= field {fieldsep field} [fieldsep]
-func _parseFieldList(lexer *Lexer) (ks, vs []Exp) {
-	if lexer.LookAhead() != TOKEN_SEP_RCURLY {
-		k, v := _parseField(lexer)
+func _parseFieldList(lex *lexer.Lexer) (ks, vs []ast.Exp) {
+	if lex.LookAhead() != lexer.TOKEN_SEP_RCURLY {
+		k, v := _parseField(lex)
 		ks = append(ks, k)
 		vs = append(vs, v)
 
-		for _isFieldSep(lexer.LookAhead()) {
-			lexer.NextToken()
-			if lexer.LookAhead() != TOKEN_SEP_RCURLY {
-				k, v := _parseField(lexer)
+		for _isFieldSep(lex.LookAhead()) {
+			lex.NextToken()
+			if lex.LookAhead() != lexer.TOKEN_SEP_RCURLY {
+				k, v := _parseField(lex)
 				ks = append(ks, k)
 				vs = append(vs, v)
 			} else {
@@ -308,27 +308,27 @@ func _parseFieldList(lexer *Lexer) (ks, vs []Exp) {
 
 // fieldsep ::= ‘,’ | ‘;’
 func _isFieldSep(tokenKind int) bool {
-	return tokenKind == TOKEN_SEP_COMMA || tokenKind == TOKEN_SEP_SEMI
+	return tokenKind == lexer.TOKEN_SEP_COMMA || tokenKind == lexer.TOKEN_SEP_SEMI
 }
 
 // field ::= ‘[’ exp ‘]’ ‘=’ exp | Name ‘=’ exp | exp
-func _parseField(lexer *Lexer) (k, v Exp) {
-	if lexer.LookAhead() == TOKEN_SEP_LBRACK {
-		lexer.NextToken()                       // [
-		k = parseExp(lexer)                     // exp
-		lexer.NextTokenOfKind(TOKEN_SEP_RBRACK) // ]
-		lexer.NextTokenOfKind(TOKEN_OP_ASSIGN)  // =
-		v = parseExp(lexer)                     // exp
+func _parseField(lex *lexer.Lexer) (k, v ast.Exp) {
+	if lex.LookAhead() == lexer.TOKEN_SEP_LBRACK {
+		lex.NextToken()                       // [
+		k = parseExp(lex)                     // exp
+		lex.NextTokenOfKind(lexer.TOKEN_SEP_RBRACK) // ]
+		lex.NextTokenOfKind(lexer.TOKEN_OP_ASSIGN)  // =
+		v = parseExp(lex)                     // exp
 		return
 	}
 
-	exp := parseExp(lexer)
-	if nameExp, ok := exp.(*NameExp); ok {
-		if lexer.LookAhead() == TOKEN_OP_ASSIGN {
+	exp := parseExp(lex)
+	if nameExp, ok := exp.(*ast.NameExp); ok {
+		if lex.LookAhead() == lexer.TOKEN_OP_ASSIGN {
 			// Name ‘=’ exp => ‘[’ LiteralString ‘]’ = exp
-			lexer.NextToken()
-			k = &StringExp{nameExp.Line, nameExp.Name}
-			v = parseExp(lexer)
+			lex.NextToken()
+			k = &ast.StringExp{nameExp.Line, nameExp.Name}
+			v = parseExp(lex)
 			return
 		}
 	}

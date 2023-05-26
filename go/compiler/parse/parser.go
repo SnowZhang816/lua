@@ -1,13 +1,13 @@
-package parser
+package parse
 
-import "main/ast"
-import "main/lexer"
+import "main/compiler/ast"
+import "main/compiler/lexer"
 
 /* recursive descent parser */
 
-func Parse(chunk, chunkName string) *Block {
-	lexer := NewLexer(chunk, chunkName)
-	block := parseBlock(lexer)
-	lexer.NextTokenOfKind(TOKEN_EOF)
+func Parse(chunk, chunkName string) *ast.Block {
+	lex := lexer.NewLexer(chunk, chunkName)
+	block := parseBlock(lex)
+	lex.NextTokenOfKind(lexer.TOKEN_EOF)
 	return block
 }

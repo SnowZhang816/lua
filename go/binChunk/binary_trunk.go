@@ -1,6 +1,8 @@
 package binChunk
 
 import "main/cLog"
+import "bytes"
+import "encoding/binary"
 
 const (
 	LUA_SIGNATURE      	= 0x61754C1B//0x1B4C7561 //"\x1bLua"
@@ -80,5 +82,13 @@ func UnDump(data []byte) *Prototype {
 	reader.readByte()
 	cLog.Println("readProto===========")
 	return reader.readProto("")
+}
+
+func IsBinaryChunk(data []byte) bool {
+	var x int32
+	bytesBuffer := bytes.NewBuffer(data[:4])
+    binary.Read(bytesBuffer, binary.LittleEndian, &x)
+
+	return len(data) > 4 && x == LUA_SIGNATURE
 }
 

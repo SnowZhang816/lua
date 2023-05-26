@@ -145,4 +145,7 @@ t.foo = function ()
     print("foo")
 end
 
+local str = [[dsadsadsadsadsafdsafsadfasfas
+dsadsadasdasdasd]]
+
 return t

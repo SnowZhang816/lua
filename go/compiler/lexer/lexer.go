@@ -6,6 +6,7 @@ import "regexp"
 import "strconv"
 import "strings"
 
+//var reSpaces = regexp.MustCompile(`^\s+`)
 var reNewLine = regexp.MustCompile("\r\n|\n\r|\n|\r")
 var reIdentifier = regexp.MustCompile(`^[_\d\w]+`)
 var reNumber = regexp.MustCompile(`^0[xX][0-9a-fA-F]*(\.[0-9a-fA-F]*)?([pP][+\-]?[0-9]+)?|^[0-9]*(\.[0-9]*)?([eE][+\-]?[0-9]+)?`)
@@ -17,17 +18,16 @@ var reHexEscapeSeq = regexp.MustCompile(`^\\x[0-9a-fA-F]{2}`)
 var reUnicodeEscapeSeq = regexp.MustCompile(`^\\u\{[0-9a-fA-F]+\}`)
 
 type Lexer struct {
-	chunk 				string	//源代码
-	chunkName 			string	//源文件名
-	line				int		//当前行号
-
+	chunk         string // source code
+	chunkName     string // source name
+	line          int    // current line number
 	nextToken     string
 	nextTokenKind int
 	nextTokenLine int
 }
 
 func NewLexer(chunk, chunkName string) *Lexer {
-	return &Lexer(chunk, chunkName, 1)
+	return &Lexer{chunk, chunkName, 1, "", 0, 0}
 }
 
 func (self *Lexer) Line() int {
@@ -59,7 +59,7 @@ func (self *Lexer) NextTokenOfKind(kind int) (line int, token string) {
 	return line, token
 }
 
-func NextToken() (line, kind int, token string) {
+func (self *Lexer) NextToken() (line, kind int, token string) {
 	if self.nextTokenLine > 0 {
 		line = self.nextTokenLine
 		kind = self.nextTokenKind
@@ -196,22 +196,36 @@ func NextToken() (line, kind int, token string) {
 		return self.line, TOKEN_STRING, self.scanShortString()
 	}
 
-	c := chunk[0]
-	if c == "." || isDigit(c) {
+	c := self.chunk[0]
+	if c == '.' || isDigit(c) {
 		token := self.scanNumber()
 		return self.line, TOKEN_NUMBER, token
 	}
-
-	if c == "_" || isLetter(c) {
+	if c == '_' || isLetter(c) {
 		token := self.scanIdentifier()
 		if kind, found := keywords[token]; found {
-			return line, kind, token
+			return self.line, kind, token // keyword
 		} else {
-			return line, TOKEN_IDENTIFIER, token
+			return self.line, TOKEN_IDENTIFIER, token
 		}
 	}
 
 	self.error("unexpected symbol near %q", c)
+	return
+}
+
+func (self *Lexer) next(n int) {
+	self.chunk = self.chunk[n:]
+}
+
+func (self *Lexer) test(s string) bool {
+	return strings.HasPrefix(self.chunk, s)
+}
+
+func (self *Lexer) error(f string, a ...interface{}) {
+	err := fmt.Sprintf(f, a...)
+	err = fmt.Sprintf("%s:%d: %s", self.chunkName, self.line, err)
+	panic(err)
 }
 
 func (self *Lexer) skipWhiteSpaces() {
@@ -232,30 +246,10 @@ func (self *Lexer) skipWhiteSpaces() {
 	}
 }
 
-func (self *Lexer) test(s string) bool {
-	return strings.HasPrefix(self.chunk, s)
-}
-
-func (self *Lexer) isWhiteSpace(c byte) bool {
-	switch expression {
-	case "\t", "\n", "\v", "\f", "\r", " ":
-		return true
-	}
-	return false
-}
-
-func (self *Lexer) next(n int) {
-	self.chunk = self.chunk[n:]
-}
-
-func (self *Lexer) isNewLine(c int) {
-	return c == "\r" || c == "\n"
-}
-
-
 func (self *Lexer) skipComment() {
-	self.next(2)
+	self.next(2) // skip --
 
+	// long comment ?
 	if self.test("[") {
 		if reOpeningLongBracket.FindString(self.chunk) != "" {
 			self.scanLongString()
@@ -263,9 +257,26 @@ func (self *Lexer) skipComment() {
 		}
 	}
 
+	// short comment
 	for len(self.chunk) > 0 && !isNewLine(self.chunk[0]) {
 		self.next(1)
 	}
+}
+
+func (self *Lexer) scanIdentifier() string {
+	return self.scan(reIdentifier)
+}
+
+func (self *Lexer) scanNumber() string {
+	return self.scan(reNumber)
+}
+
+func (self *Lexer) scan(re *regexp.Regexp) string {
+	if token := re.FindString(self.chunk); token != "" {
+		self.next(len(token))
+		return token
+	}
+	panic("unreachable!")
 }
 
 func (self *Lexer) scanLongString() string {
@@ -292,7 +303,6 @@ func (self *Lexer) scanLongString() string {
 
 	return str
 }
-
 
 func (self *Lexer) scanShortString() string {
 	if str := reShortStr.FindString(self.chunk); str != "" {
@@ -403,33 +413,22 @@ func (self *Lexer) escape(str string) string {
 	return buf.String()
 }
 
-func isDigit(c byte) bool {
-	return c >= "0" && c <= "9"
-}
-
-func (self *Lexer) scanNumber() string {
-	return scan(reNumber)
-}
-
-func (self *Lexer) scan(re *regexp.Regexp) string {
-	if token := re.FindString(self.chunk); token != "" {
-		self.next(len(token))
-		return token
+func isWhiteSpace(c byte) bool {
+	switch c {
+	case '\t', '\n', '\v', '\f', '\r', ' ':
+		return true
 	}
-
-	panic("unreachable")
+	return false
 }
 
-func isLatter(c byte) bool {
-	return c >= "a" && c <= "z" || c >= "A" && c <= "Z"
+func isNewLine(c byte) bool {
+	return c == '\r' || c == '\n'
 }
 
-func (self *Lexer) scanIdentifier() string {
-	return scan(reIdentifier)
+func isDigit(c byte) bool {
+	return c >= '0' && c <= '9'
 }
 
-func (self *Lexer) error(f string, a ...interface{}) {
-	err := fmt.Sprintf(f, a...)
-	err = fmt.Sprintf("%s:%d: %s", self.chunkName, self.line, err)
-	panic(err)
+func isLetter(c byte) bool {
+	return c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z'
 }
