@@ -26,7 +26,7 @@ func cgStat(fi *funcInfo, node ast.Stat) {
 		cgLocalVarDeclStat(fi, stat)
 	case *ast.LocalFuncDefStat:
 		cgLocalFuncDefStat(fi, stat)
-	case *ast.LabelStat, *GotoStat:
+	case *ast.LabelStat, *ast.GotoStat:
 		panic("label and goto statements are not supported!")
 	}
 }
@@ -157,9 +157,9 @@ func cgForNumStat(fi *funcInfo, node *ast.ForNumStat) {
 
 	fi.enterScope(true)
 
-	cgLocalVarDeclStat(fi, &LocalVarDeclStat{
+	cgLocalVarDeclStat(fi, &ast.LocalVarDeclStat{
 		NameList: []string{forIndexVar, forLimitVar, forStepVar},
-		ExpList:  []Exp{node.InitExp, node.LimitExp, node.StepExp},
+		ExpList:  []ast.Exp{node.InitExp, node.LimitExp, node.StepExp},
 	})
 	fi.addLocVar(node.VarName, fi.pc()+2)
 
@@ -185,7 +185,7 @@ func cgForInStat(fi *funcInfo, node *ast.ForInStat) {
 
 	fi.enterScope(true)
 
-	cgLocalVarDeclStat(fi, &LocalVarDeclStat{
+	cgLocalVarDeclStat(fi, &ast.LocalVarDeclStat{
 		//LastLine: 0,
 		NameList: []string{forGeneratorVar, forStateVar, forControlVar},
 		ExpList:  node.ExpList,
@@ -268,13 +268,13 @@ func cgAssignStat(fi *funcInfo, node *ast.AssignStat) {
 	oldRegs := fi.usedRegs
 
 	for i, exp := range node.VarList {
-		if taExp, ok := exp.(*TableAccessExp); ok {
+		if taExp, ok := exp.(*ast.TableAccessExp); ok {
 			tRegs[i] = fi.allocReg()
 			cgExp(fi, taExp.PrefixExp, tRegs[i], 1)
 			kRegs[i] = fi.allocReg()
 			cgExp(fi, taExp.KeyExp, kRegs[i], 1)
 		} else {
-			name := exp.(*NameExp).Name
+			name := exp.(*ast.NameExp).Name
 			if fi.slotOfLocVar(name) < 0 && fi.indexOfUpval(name) < 0 {
 				// global var
 				kRegs[i] = -1
@@ -319,7 +319,7 @@ func cgAssignStat(fi *funcInfo, node *ast.AssignStat) {
 
 	lastLine := node.LastLine
 	for i, exp := range node.VarList {
-		if nameExp, ok := exp.(*NameExp); ok {
+		if nameExp, ok := exp.(*ast.NameExp); ok {
 			varName := nameExp.Name
 			if a := fi.slotOfLocVar(varName); a >= 0 {
 				fi.emitMove(lastLine, a, vRegs[i])

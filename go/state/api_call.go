@@ -13,7 +13,7 @@ func (self *luaState) Load(chunk []byte, chunkName, mode string) int {
 	if binChunk.IsBinaryChunk(chunk) {
 		proto = binChunk.UnDump(chunk)
 	} else {
-		proto = compiler.Compile(chunk)
+		proto = compiler.Compile(string(chunk), chunkName)
 	}
 
 	aUtil.PrintProto(proto)

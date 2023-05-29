@@ -4,6 +4,21 @@ import "main/compiler/ast"
 import "main/compiler/lexer"
 import "main/vm"
 
+var arithAndBitwiseBinops = map[int]int{
+	lexer.TOKEN_OP_ADD:  vm.OP_ADD,
+	lexer.TOKEN_OP_SUB:  vm.OP_SUB,
+	lexer.TOKEN_OP_MUL:  vm.OP_MUL,
+	lexer.TOKEN_OP_MOD:  vm.OP_MOD,
+	lexer.TOKEN_OP_POW:  vm.OP_POW,
+	lexer.TOKEN_OP_DIV:  vm.OP_DIV,
+	lexer.TOKEN_OP_IDIV: vm.OP_IDIV,
+	lexer.TOKEN_OP_BAND: vm.OP_BAND,
+	lexer.TOKEN_OP_BOR:  vm.OP_BOR,
+	lexer.TOKEN_OP_BXOR: vm.OP_BXOR,
+	lexer.TOKEN_OP_SHL:  vm.OP_SHL,
+	lexer.TOKEN_OP_SHR:  vm.OP_SHR,
+}
+
 type upvalInfo struct {
 	locVarSlot int
 	upvalIndex int
@@ -36,6 +51,7 @@ type funcInfo struct {
 	isVararg		bool
 	line			int
 	lastLine		int
+	lineNums  []uint32
 }
 
 func newFuncInfo(parent *funcInfo, fd *ast.FuncDefExp) *funcInfo {
@@ -92,7 +108,7 @@ func (self *funcInfo) allocRegs(n int) int {
 	return self.usedRegs - n
 }
 
-func (self *funcInfo) freeRegs(n int) int {
+func (self *funcInfo) freeRegs(n int) {
 	for i := 0; i < n; i++ {
 		self.freeReg()
 	}
@@ -107,17 +123,20 @@ func (self *funcInfo) enterScope(breakable bool)  {
 	}
 }
 
-func (self *funcInfo) addLocalVar(name string) int {
+func (self *funcInfo) addLocalVar(name string, startPC int) int {
 	newVar := &locVarInfo{
-		name:		name,
-		prev:		self.localNames[name],
-		scopeLv:	self.scopeLv,
-		slot:		self.allocReg(),
+		name:    name,
+		prev:    self.locNames[name],
+		scopeLv: self.scopeLv,
+		slot:    self.allocReg(),
+		startPC: startPC,
+		endPC:   0,
 	}
 
 	self.locVars = append(self.locVars, newVar)
-	self.localNames[name] = newVar
-	return newVar
+	self.locNames[name] = newVar
+
+	return newVar.slot
 }
 
 func (self *funcInfo) slotOfLocVar(name string) int {
@@ -134,7 +153,7 @@ func (self *funcInfo) exitScope(endPC int) {
 	a := self.getJmpArgA()
 	for _, pc := range pendingBreakJmps {
 		sBx := self.pc() - pc
-		i := (sBx+MAXARG_sBx)<<14 | a<<6 | OP_JMP
+		i := (sBx+vm.MAXARG_sBx)<<14 | a<<6 | vm.OP_JMP
 		self.insts[pc] = uint32(i)
 	}
 
@@ -228,7 +247,7 @@ func (self *funcInfo) pc() int {
 func (self *funcInfo) fixSbx(pc, sBx int) {
 	i := self.insts[pc]
 	i = i << 18 >> 18                  // clear sBx
-	i = i | uint32(sBx+MAXARG_sBx)<<14 // reset sBx
+	i = i | uint32(sBx+vm.MAXARG_sBx)<<14 // reset sBx
 	self.insts[pc] = i
 }
 
@@ -256,7 +275,7 @@ func (self *funcInfo) emitABx(line, opcode, a, bx int) {
 }
 
 func (self *funcInfo) emitAsBx(line, opcode, a, b int) {
-	i := (b+MAXARG_sBx)<<14 | a<<6 | opcode
+	i := (b+vm.MAXARG_sBx)<<14 | a<<6 | opcode
 	self.insts = append(self.insts, uint32(i))
 	self.lineNums = append(self.lineNums, uint32(line))
 }
@@ -269,146 +288,146 @@ func (self *funcInfo) emitAx(line, opcode, ax int) {
 
 // r[a] = r[b]
 func (self *funcInfo) emitMove(line, a, b int) {
-	self.emitABC(line, OP_MOVE, a, b, 0)
+	self.emitABC(line, vm.OP_MOVE, a, b, 0)
 }
 
 // r[a], r[a+1], ..., r[a+b] = nil
 func (self *funcInfo) emitLoadNil(line, a, n int) {
-	self.emitABC(line, OP_LOADNIL, a, n-1, 0)
+	self.emitABC(line, vm.OP_LOADNIL, a, n-1, 0)
 }
 
 // r[a] = (bool)b; if (c) pc++
 func (self *funcInfo) emitLoadBool(line, a, b, c int) {
-	self.emitABC(line, OP_LOADBOOL, a, b, c)
+	self.emitABC(line, vm.OP_LOADBOOL, a, b, c)
 }
 
 // r[a] = kst[bx]
 func (self *funcInfo) emitLoadK(line, a int, k interface{}) {
 	idx := self.indexOfConstant(k)
 	if idx < (1 << 18) {
-		self.emitABx(line, OP_LOADK, a, idx)
+		self.emitABx(line, vm.OP_LOADK, a, idx)
 	} else {
-		self.emitABx(line, OP_LOADKX, a, 0)
-		self.emitAx(line, OP_EXTRAARG, idx)
+		self.emitABx(line, vm.OP_LOADKX, a, 0)
+		self.emitAx(line, vm.OP_EXTRAARG, idx)
 	}
 }
 
 // r[a], r[a+1], ..., r[a+b-2] = vararg
 func (self *funcInfo) emitVararg(line, a, n int) {
-	self.emitABC(line, OP_VARARG, a, n+1, 0)
+	self.emitABC(line, vm.OP_VARARG, a, n+1, 0)
 }
 
 // r[a] = emitClosure(proto[bx])
 func (self *funcInfo) emitClosure(line, a, bx int) {
-	self.emitABx(line, OP_CLOSURE, a, bx)
+	self.emitABx(line, vm.OP_CLOSURE, a, bx)
 }
 
 // r[a] = {}
 func (self *funcInfo) emitNewTable(line, a, nArr, nRec int) {
-	self.emitABC(line, OP_NEWTABLE,
-		a, Int2fb(nArr), Int2fb(nRec))
+	self.emitABC(line, vm.OP_NEWTABLE,
+		a, vm.Int2fb(nArr), vm.Int2fb(nRec))
 }
 
 // r[a][(c-1)*FPF+i] := r[a+i], 1 <= i <= b
 func (self *funcInfo) emitSetList(line, a, b, c int) {
-	self.emitABC(line, OP_SETLIST, a, b, c)
+	self.emitABC(line, vm.OP_SETLIST, a, b, c)
 }
 
 // r[a] := r[b][rk(c)]
 func (self *funcInfo) emitGetTable(line, a, b, c int) {
-	self.emitABC(line, OP_GETTABLE, a, b, c)
+	self.emitABC(line, vm.OP_GETTABLE, a, b, c)
 }
 
 // r[a][rk(b)] = rk(c)
 func (self *funcInfo) emitSetTable(line, a, b, c int) {
-	self.emitABC(line, OP_SETTABLE, a, b, c)
+	self.emitABC(line, vm.OP_SETTABLE, a, b, c)
 }
 
 // r[a] = upval[b]
 func (self *funcInfo) emitGetUpval(line, a, b int) {
-	self.emitABC(line, OP_GETUPVAL, a, b, 0)
+	self.emitABC(line, vm.OP_GETUPVAL, a, b, 0)
 }
 
 // upval[b] = r[a]
 func (self *funcInfo) emitSetUpval(line, a, b int) {
-	self.emitABC(line, OP_SETUPVAL, a, b, 0)
+	self.emitABC(line, vm.OP_SETUPVAL, a, b, 0)
 }
 
 // r[a] = upval[b][rk(c)]
 func (self *funcInfo) emitGetTabUp(line, a, b, c int) {
-	self.emitABC(line, OP_GETTABUP, a, b, c)
+	self.emitABC(line, vm.OP_GETTABUP, a, b, c)
 }
 
 // upval[a][rk(b)] = rk(c)
 func (self *funcInfo) emitSetTabUp(line, a, b, c int) {
-	self.emitABC(line, OP_SETTABUP, a, b, c)
+	self.emitABC(line, vm.OP_SETTABUP, a, b, c)
 }
 
 // r[a], ..., r[a+c-2] = r[a](r[a+1], ..., r[a+b-1])
 func (self *funcInfo) emitCall(line, a, nArgs, nRet int) {
-	self.emitABC(line, OP_CALL, a, nArgs+1, nRet+1)
+	self.emitABC(line, vm.OP_CALL, a, nArgs+1, nRet+1)
 }
 
 // return r[a](r[a+1], ... ,r[a+b-1])
 func (self *funcInfo) emitTailCall(line, a, nArgs int) {
-	self.emitABC(line, OP_TAILCALL, a, nArgs+1, 0)
+	self.emitABC(line, vm.OP_TAILCALL, a, nArgs+1, 0)
 }
 
 // return r[a], ... ,r[a+b-2]
 func (self *funcInfo) emitReturn(line, a, n int) {
-	self.emitABC(line, OP_RETURN, a, n+1, 0)
+	self.emitABC(line, vm.OP_RETURN, a, n+1, 0)
 }
 
 // r[a+1] := r[b]; r[a] := r[b][rk(c)]
 func (self *funcInfo) emitSelf(line, a, b, c int) {
-	self.emitABC(line, OP_SELF, a, b, c)
+	self.emitABC(line, vm.OP_SELF, a, b, c)
 }
 
 // pc+=sBx; if (a) close all upvalues >= r[a - 1]
 func (self *funcInfo) emitJmp(line, a, sBx int) int {
-	self.emitAsBx(line, OP_JMP, a, sBx)
+	self.emitAsBx(line, vm.OP_JMP, a, sBx)
 	return len(self.insts) - 1
 }
 
 // if not (r[a] <=> c) then pc++
 func (self *funcInfo) emitTest(line, a, c int) {
-	self.emitABC(line, OP_TEST, a, 0, c)
+	self.emitABC(line, vm.OP_TEST, a, 0, c)
 }
 
 // if (r[b] <=> c) then r[a] := r[b] else pc++
 func (self *funcInfo) emitTestSet(line, a, b, c int) {
-	self.emitABC(line, OP_TESTSET, a, b, c)
+	self.emitABC(line, vm.OP_TESTSET, a, b, c)
 }
 
 func (self *funcInfo) emitForPrep(line, a, sBx int) int {
-	self.emitAsBx(line, OP_FORPREP, a, sBx)
+	self.emitAsBx(line, vm.OP_FORPREP, a, sBx)
 	return len(self.insts) - 1
 }
 
 func (self *funcInfo) emitForLoop(line, a, sBx int) int {
-	self.emitAsBx(line, OP_FORLOOP, a, sBx)
+	self.emitAsBx(line, vm.OP_FORLOOP, a, sBx)
 	return len(self.insts) - 1
 }
 
 func (self *funcInfo) emitTForCall(line, a, c int) {
-	self.emitABC(line, OP_TFORCALL, a, 0, c)
+	self.emitABC(line, vm.OP_TFORCALL, a, 0, c)
 }
 
 func (self *funcInfo) emitTForLoop(line, a, sBx int) {
-	self.emitAsBx(line, OP_TFORLOOP, a, sBx)
+	self.emitAsBx(line, vm.OP_TFORLOOP, a, sBx)
 }
 
 // r[a] = op r[b]
 func (self *funcInfo) emitUnaryOp(line, op, a, b int) {
 	switch op {
-	case TOKEN_OP_NOT:
-		self.emitABC(line, OP_NOT, a, b, 0)
-	case TOKEN_OP_BNOT:
-		self.emitABC(line, OP_BNOT, a, b, 0)
-	case TOKEN_OP_LEN:
-		self.emitABC(line, OP_LEN, a, b, 0)
-	case TOKEN_OP_UNM:
-		self.emitABC(line, OP_UNM, a, b, 0)
+	case lexer.TOKEN_OP_NOT:
+		self.emitABC(line, vm.OP_NOT, a, b, 0)
+	case lexer.TOKEN_OP_BNOT:
+		self.emitABC(line, vm.OP_BNOT, a, b, 0)
+	case lexer.TOKEN_OP_LEN:
+		self.emitABC(line, vm.OP_LEN, a, b, 0)
+	case lexer.TOKEN_OP_UNM:
+		self.emitABC(line, vm.OP_UNM, a, b, 0)
 	}
 }
 
@@ -419,18 +438,18 @@ func (self *funcInfo) emitBinaryOp(line, op, a, b, c int) {
 		self.emitABC(line, opcode, a, b, c)
 	} else {
 		switch op {
-		case TOKEN_OP_EQ:
-			self.emitABC(line, OP_EQ, 1, b, c)
-		case TOKEN_OP_NE:
-			self.emitABC(line, OP_EQ, 0, b, c)
-		case TOKEN_OP_LT:
-			self.emitABC(line, OP_LT, 1, b, c)
-		case TOKEN_OP_GT:
-			self.emitABC(line, OP_LT, 1, c, b)
-		case TOKEN_OP_LE:
-			self.emitABC(line, OP_LE, 1, b, c)
-		case TOKEN_OP_GE:
-			self.emitABC(line, OP_LE, 1, c, b)
+		case lexer.TOKEN_OP_EQ:
+			self.emitABC(line, vm.OP_EQ, 1, b, c)
+		case lexer.TOKEN_OP_NE:
+			self.emitABC(line, vm.OP_EQ, 0, b, c)
+		case lexer.TOKEN_OP_LT:
+			self.emitABC(line, vm.OP_LT, 1, b, c)
+		case lexer.TOKEN_OP_GT:
+			self.emitABC(line, vm.OP_LT, 1, c, b)
+		case lexer.TOKEN_OP_LE:
+			self.emitABC(line, vm.OP_LE, 1, b, c)
+		case lexer.TOKEN_OP_GE:
+			self.emitABC(line, vm.OP_LE, 1, c, b)
 		}
 		self.emitJmp(line, 0, 1)
 		self.emitLoadBool(line, a, 0, 1)

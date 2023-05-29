@@ -4,7 +4,7 @@ import "main/compiler/ast"
 
 func isVarargOrFuncCall(exp ast.Exp) bool {
 	switch exp.(type) {
-	case *VarargExp, *FuncCallExp:
+	case *ast.VarargExp, *ast.FuncCallExp:
 		return true
 	}
 	return false
@@ -12,7 +12,7 @@ func isVarargOrFuncCall(exp ast.Exp) bool {
 
 func removeTailNils(exps []ast.Exp) []ast.Exp {
 	for n := len(exps) - 1; n >= 0; n-- {
-		if _, ok := exps[n].(*NilExp); !ok {
+		if _, ok := exps[n].(*ast.NilExp); !ok {
 			return exps[0 : n+1]
 		}
 	}

@@ -4,7 +4,7 @@ import "main/binChunk"
 import "main/compiler/ast"
 
 func GenProto(chunk *ast.Block) *binChunk.Prototype {
-	fd := &FuncDefExp{
+	fd := &ast.FuncDefExp{
 		LastLine: chunk.LastLine,
 		IsVararg: true,
 		Block:    chunk,

@@ -3,18 +3,18 @@ package codegen
 import "main/binChunk"
 
 func toProto(fi *funcInfo) *binChunk.Prototype {
-	proto := &Prototype{
+	proto := &binChunk.Prototype{
 		LineDefined:     uint32(fi.line),
 		LastLineDefined: uint32(fi.lastLine),
 		NumParams:       byte(fi.numParams),
 		MaxStackSize:    byte(fi.maxRegs),
 		Code:            fi.insts,
 		Constants:       getConstants(fi),
-		Upvalues:        getUpvalues(fi),
+		UpValues:        getUpvalues(fi),
 		Protos:          toProtos(fi.subFuncs),
 		LineInfo:        fi.lineNums,
 		LocVars:         getLocVars(fi),
-		UpvalueNames:    getUpvalueNames(fi),
+		UpValuesNames:    getUpvalueNames(fi),
 	}
 
 	if fi.line == 0 {
@@ -24,14 +24,14 @@ func toProto(fi *funcInfo) *binChunk.Prototype {
 		proto.MaxStackSize = 2 // todo
 	}
 	if fi.isVararg {
-		proto.IsVararg = 1 // todo
+		proto.IsVarArg = 1 // todo
 	}
 
 	return proto
 }
 
 func toProtos(fis []*funcInfo) []*binChunk.Prototype {
-	protos := make([]*Prototype, len(fis))
+	protos := make([]*binChunk.Prototype, len(fis))
 	for i, fi := range fis {
 		protos[i] = toProto(fi)
 	}
@@ -47,7 +47,7 @@ func getConstants(fi *funcInfo) []interface{} {
 }
 
 func getLocVars(fi *funcInfo) []binChunk.LocVar {
-	locVars := make([]LocVar, len(fi.locVars))
+	locVars := make([]binChunk.LocVar, len(fi.locVars))
 	for i, locVar := range fi.locVars {
 		locVars[i] = binChunk.LocVar{
 			VarName: locVar.name,

@@ -142,12 +142,12 @@ func cgUnopExp(fi *funcInfo, node *ast.UnopExp, a int) {
 // r[a] := exp1 op exp2
 func cgBinopExp(fi *funcInfo, node *ast.BinopExp, a int) {
 	switch node.Op {
-	case TOKEN_OP_AND, TOKEN_OP_OR:
+	case lexer.TOKEN_OP_AND, lexer.TOKEN_OP_OR:
 		oldRegs := fi.usedRegs
 
 		b, _ := expToOpArg(fi, node.Exp1, ARG_REG)
 		fi.usedRegs = oldRegs
-		if node.Op == TOKEN_OP_AND {
+		if node.Op == lexer.TOKEN_OP_AND {
 			fi.emitTestSet(node.Line, a, b, 0)
 		} else {
 			fi.emitTestSet(node.Line, a, b, 1)
@@ -177,7 +177,7 @@ func cgConcatExp(fi *funcInfo, node *ast.ConcatExp, a int) {
 	c := fi.usedRegs - 1
 	b := c - len(node.Exps) + 1
 	fi.freeRegs(c - b + 1)
-	fi.emitABC(node.Line, OP_CONCAT, a, b, c)
+	fi.emitABC(node.Line, vm.OP_CONCAT, a, b, c)
 }
 
 // r[a] := name
@@ -187,10 +187,10 @@ func cgNameExp(fi *funcInfo, node *ast.NameExp, a int) {
 	} else if idx := fi.indexOfUpval(node.Name); idx >= 0 {
 		fi.emitGetUpval(node.Line, a, idx)
 	} else { // x => _ENV['x']
-		taExp := &TableAccessExp{
+		taExp := &ast.TableAccessExp{
 			LastLine:  node.Line,
-			PrefixExp: &NameExp{node.Line, "_ENV"},
-			KeyExp:    &StringExp{node.Line, node.Name},
+			PrefixExp: &ast.NameExp{node.Line, "_ENV"},
+			KeyExp:    &ast.StringExp{node.Line, node.Name},
 		}
 		cgTableAccessExp(fi, taExp, a)
 	}
@@ -261,17 +261,17 @@ func expToOpArg(fi *funcInfo, node ast.Exp, argKinds int) (arg, argKind int) {
 	if argKinds&ARG_CONST > 0 {
 		idx := -1
 		switch x := node.(type) {
-		case *NilExp:
+		case *ast.NilExp:
 			idx = fi.indexOfConstant(nil)
-		case *FalseExp:
+		case *ast.FalseExp:
 			idx = fi.indexOfConstant(false)
-		case *TrueExp:
+		case *ast.TrueExp:
 			idx = fi.indexOfConstant(true)
-		case *IntegerExp:
+		case *ast.IntegerExp:
 			idx = fi.indexOfConstant(x.Val)
-		case *FloatExp:
+		case *ast.FloatExp:
 			idx = fi.indexOfConstant(x.Val)
-		case *StringExp:
+		case *ast.StringExp:
 			idx = fi.indexOfConstant(x.Str)
 		}
 		if idx >= 0 && idx <= 0xFF {
@@ -279,7 +279,7 @@ func expToOpArg(fi *funcInfo, node ast.Exp, argKinds int) (arg, argKind int) {
 		}
 	}
 
-	if nameExp, ok := node.(*NameExp); ok {
+	if nameExp, ok := node.(*ast.NameExp); ok {
 		if argKinds&ARG_REG > 0 {
 			if r := fi.slotOfLocVar(nameExp.Name); r >= 0 {
 				return r, ARG_REG
